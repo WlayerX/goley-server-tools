@@ -30,6 +30,11 @@ volatile LONG g_nmrunGetParamHits = 0;
 // --- CreateProcess syscall VA ---
 DWORD g_createProcessWVA = 0;
 
+// --- HWBP WaitForMultipleObjects fallback (Commit B) ---
+volatile LONG g_useHwbpWait = 0;
+DWORD         g_wfmoVA       = 0;
+volatile LONG g_hwbpWaitHit  = 0;
+
 // --- Logging ---
 char   g_logPath[MAX_PATH] = {0};
 HANDLE g_conHandle = INVALID_HANDLE_VALUE;

@@ -203,6 +203,16 @@ DWORD WINAPI PatchThread(LPVOID lpParam) {
             wsprintfA(buf, "ntdll!NtCreateUserProcess resolved at 0x%X", g_createProcessWVA);
             Log(buf);
         }
+        // Resolve kernel32!WaitForMultipleObjects entry for the HWBP wait
+        // fallback (Commit B). Only consumed when g_useHwbpWait==1 and DR3 has
+        // been freed (g_cpHit). Resolved unconditionally so the address is
+        // ready the moment the toggle is honored.
+        HMODULE hK32 = GetModuleHandleA("kernel32.dll");
+        if (hK32) {
+            g_wfmoVA = (DWORD)(ULONG_PTR)GetProcAddress(hK32, "WaitForMultipleObjects");
+            wsprintfA(buf, "kernel32!WaitForMultipleObjects resolved at 0x%X (HWBP wait fallback target)", g_wfmoVA);
+            Log(buf);
+        }
         // BLOCK CreateProcess: any call returns FALSE without spawning a child.
         // This prevents Goley_'s "trusted re-launch" pattern. Parent process
         // already has all our bypasses applied, so it can continue solo.
@@ -404,10 +414,27 @@ DWORD WINAPI PatchThread(LPVOID lpParam) {
         // GG result: one-shot. Once hit, NEVER re-arm (Themida anti-debug
         // probes DRx periodically and persistent set kills us in ~2 sec).
         DWORD t2 = g_ggrHit ? 0 : (DWORD)(g_imageBase + GG_RESULT_PATCH_RVA);
-        // CreateProcessW hook: one-shot. Fires when parent re-execs the
-        // child Goley_, adds CREATE_SUSPENDED so we can inject before run.
-        // Uses kernel32!CreateProcessW entry point so ANY caller is caught.
-        DWORD t3 = g_cpHit ? 0 : g_createProcessWVA;
+        // DR3 priority arbiter:
+        //   1) NtCreateUserProcess (one-shot): adds CREATE_SUSPENDED so we can
+        //      inject before the re-exec'd child runs. Highest priority.
+        //   2) After it retires (g_cpHit), if the HWBP wait fallback is enabled,
+        //      reuse the now-free DR3 to intercept WaitForMultipleObjects via
+        //      VEH instead of the MinHook inline patch (Themida-friendlier, no
+        //      .text write). Temporal slot reuse -- no extra hardware slot.
+        DWORD t3;
+        static BOOL hwbpWaitArmedLogged = FALSE;
+        if (!g_cpHit) {
+            t3 = g_createProcessWVA;
+        } else if (g_useHwbpWait && g_wfmoVA) {
+            t3 = g_wfmoVA;
+            if (!hwbpWaitArmedLogged) {
+                wsprintfA(buf, "HWBP wait fallback armed on DR3 @ 0x%X (NtCreateUserProcess slot freed)", g_wfmoVA);
+                Log(buf);
+                hwbpWaitArmedLogged = TRUE;
+            }
+        } else {
+            t3 = 0;
+        }
         int n = SetHardwareBreakpointAllThreads(t0, t1, t2, t3);
         totalHWBPSets += n;
         iterations++;
@@ -509,6 +536,17 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
             Log("DLL_PROCESS_ATTACH [STUB MODE]  (Goley_.exe Themida chain loader)");
             Log("full armor (VEH+HWBP+DialogKiller+BugTrap+ScyllaHide+inline patches+fake cmdline)");
             Log("self-exec detection log-only -- expect to spawn BinaryTr.bin PAYLOAD");
+        }
+
+        // HWBP WaitForMultipleObjects fallback toggle (Commit B). Default OFF;
+        // enable at runtime with env GOLEY_HWBP_WAIT=1 -- no rebuild needed to
+        // A/B test against the existing MinHook wait hooks.
+        if (!IS_OBSERVER_MODE()) {
+            char hw[8] = {0};
+            if (GetEnvironmentVariableA("GOLEY_HWBP_WAIT", hw, sizeof(hw)) && hw[0] == '1') {
+                InterlockedExchange(&g_useHwbpWait, 1);
+                Log("HWBP wait fallback ENABLED via GOLEY_HWBP_WAIT=1 (will arm on DR3 after g_cpHit)");
+            }
         }
 
         // ====================================================================

@@ -115,6 +115,59 @@ LONG CALLBACK VehHandler(PEXCEPTION_POINTERS exc) {
     // untouched. Semantically identical to "patch jne -> jmp" but
     // without modifying memory (Themida hash check stays happy).
     if (code == EXCEPTION_SINGLE_STEP) {
+        // -- HWBP WaitForMultipleObjects fallback (Commit B, behind g_useHwbpWait)
+        //    DR3 is armed on kernel32!WaitForMultipleObjects entry only AFTER
+        //    g_cpHit retires the NtCreateUserProcess BP (temporal slot reuse).
+        //    At the export entry (stdcall, ret 0x10): [esp]=ret, [esp+4]=nCount,
+        //    [esp+8]=lpHandles, [esp+0xC]=bWaitAll, [esp+0x10]=dwTimeout.
+        //    Mirrors HookedWaitForMultipleObjects (hook_wait.cpp) GameMon
+        //    2-handle auto-signal, but via debug registers (no .text write).
+        if (g_useHwbpWait && g_wfmoVA && eip == g_wfmoVA) {
+            DWORD* esp     = (DWORD*)exc->ContextRecord->Esp;
+            DWORD  retAddr = esp[0];
+            DWORD  nCount  = esp[1];
+            HANDLE* pHandles = (HANDLE*)esp[2];
+            DWORD  bWaitAll  = esp[3];
+
+            int eventIndex = -1;
+            if (g_hGameMonProcess && pHandles && !bWaitAll && nCount == 2) {
+                __try {
+                    int gmIdx = -1;
+                    for (DWORD i = 0; i < nCount; i++)
+                        if (pHandles[i] == g_hGameMonProcess) { gmIdx = (int)i; break; }
+                    if (gmIdx != -1) {
+                        eventIndex = (gmIdx == 0) ? 1 : 0;
+                        SetEvent(pHandles[eventIndex]);
+                    }
+                } __except (EXCEPTION_EXECUTE_HANDLER) {
+                    eventIndex = -1;
+                }
+            }
+
+            if (eventIndex != -1) {
+                // Fake the stdcall return WITHOUT running the function: pop the
+                // return address + 4 dword args (ret 0x10). EAX = result.
+                DWORD espBefore = exc->ContextRecord->Esp;
+                exc->ContextRecord->Eax  = WAIT_OBJECT_0 + eventIndex;
+                exc->ContextRecord->Eip  = retAddr;
+                exc->ContextRecord->Esp += 4 + 0x10;   // ret + 4 stdcall args
+                char buf[256];
+                wsprintfA(buf, "[HWBP-WFMO] tid=%lu n=%lu GameMon -> faked WAIT_OBJECT_0+%d ret=0x%X esp 0x%X->0x%X",
+                          GetCurrentThreadId(), nCount, eventIndex, retAddr,
+                          espBefore, exc->ContextRecord->Esp);
+                Log(buf);
+                InterlockedIncrement(&g_hwbpWaitHit);
+                return EXCEPTION_CONTINUE_EXECUTION;
+            }
+
+            // Non-GameMon wait: do NOT fake. Disarm DR3 for this thread and let
+            // the real WaitForMultipleObjects run natively (observer-safe). The
+            // refresh loop re-arms DR3 on the next sweep.
+            exc->ContextRecord->Dr3  = 0;
+            exc->ContextRecord->Dr7 &= ~0x40;   // clear L3
+            return EXCEPTION_CONTINUE_EXECUTION;
+        }
+
         DWORD valVA  = (DWORD)(g_imageBase + VALIDATION_RVA);
         DWORD ggrVA  = (DWORD)(g_imageBase + GG_RESULT_PATCH_RVA);
         DWORD mbwVA  = (DWORD)(g_imageBase + GG_MBW_CALL_RVA);

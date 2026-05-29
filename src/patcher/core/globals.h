@@ -36,6 +36,15 @@ extern volatile LONG g_nmrunGetParamHits;
 // --- CreateProcess syscall VA ---
 extern DWORD g_createProcessWVA;
 
+// --- HWBP WaitForMultipleObjects fallback (Commit B) ---
+// g_useHwbpWait: 0 = inert (default). Set to 1 via env GOLEY_HWBP_WAIT=1 in
+// DllMain to route WaitForMultipleObjects interception through DR3+VEH instead
+// of (in addition to) the MinHook inline wait hooks. Reuses DR3 only AFTER the
+// one-shot NtCreateUserProcess BP retires (g_cpHit==1).
+extern volatile LONG g_useHwbpWait;
+extern DWORD         g_wfmoVA;        // kernel32!WaitForMultipleObjects entry
+extern volatile LONG g_hwbpWaitHit;   // diagnostics counter
+
 // --- Logging ---
 extern char   g_logPath[MAX_PATH];
 extern HANDLE g_conHandle;
