@@ -19,14 +19,14 @@ REM MinHook gives us a safe trampoline-based API hook framework
 REM (used to intercept kernel32!CreateProcessA so we can inject
 REM our DLL into the GameMon.des child that nProtect spawns).
 cl.exe /nologo /LD /O2 /MT ^
-    /Iminhook/include /Iminhook /Iminhook/hde ^
-    patcher.cpp ^
-    minhook/hook.c ^
-    minhook/buffer.c ^
-    minhook/trampoline.c ^
-    minhook/hde/hde32.c ^
+    /Iminhook/include /Iminhook /Iminhook/hde /Icore /Ihooks /Ibypass /Imain ^
+    main\*.cpp core\*.cpp hooks\*.cpp bypass\*.cpp ^
+    minhook\hook.c ^
+    minhook\buffer.c ^
+    minhook\trampoline.c ^
+    minhook\hde\hde32.c ^
     /link /SUBSYSTEM:WINDOWS /MACHINE:X86 ^
-    user32.lib kernel32.lib ws2_32.lib ^
+    user32.lib kernel32.lib ws2_32.lib psapi.lib ^
     /OUT:revival_patcher.dll
 
 if %ERRORLEVEL% NEQ 0 (
