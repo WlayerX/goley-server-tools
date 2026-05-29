@@ -1,0 +1,370 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:fb="http://www.facebook.com/2008/fbml">
+<head><meta http-equiv="Pragma" content="no-cache" /><meta http-equiv="cache-control" content="max-age=0" /><meta http-equiv="cache-control" content="no-cache" /><meta http-equiv="expires" content="-1" /><meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" /><meta http-equiv="pragma" content="no-cache" /><meta http-equiv="X-UA-Compatible" content="IE=Edge" /><title>
+	Goley Online Ücretsiz MMO Futbol Oyunu
+</title><link rel="stylesheet" type="text/css" href="css/main.css" /></head>
+<body style="display: block; margin: 0; overflow: hidden;" scroll="no">
+
+
+    <script>
+	// Production steps of ECMA-262, Edition 6, 22.1.2.1
+		if (!Array.from) {
+		  Array.from = (function () {
+			var toStr = Object.prototype.toString;
+			var isCallable = function (fn) {
+			  return typeof fn === 'function' || toStr.call(fn) === '[object Function]';
+			};
+			var toInteger = function (value) {
+			  var number = Number(value);
+			  if (isNaN(number)) { return 0; }
+			  if (number === 0 || !isFinite(number)) { return number; }
+			  return (number > 0 ? 1 : -1) * Math.floor(Math.abs(number));
+			};
+			var maxSafeInteger = Math.pow(2, 53) - 1;
+			var toLength = function (value) {
+			  var len = toInteger(value);
+			  return Math.min(Math.max(len, 0), maxSafeInteger);
+			};
+
+			// The length property of the from method is 1.
+			return function from(arrayLike/*, mapFn, thisArg */) {
+			  // 1. Let C be the this value.
+			  var C = this;
+
+			  // 2. Let items be ToObject(arrayLike).
+			  var items = Object(arrayLike);
+
+			  // 3. ReturnIfAbrupt(items).
+			  if (arrayLike == null) {
+				throw new TypeError('Array.from requires an array-like object - not null or undefined');
+			  }
+
+			  // 4. If mapfn is undefined, then let mapping be false.
+			  var mapFn = arguments.length > 1 ? arguments[1] : void undefined;
+			  var T;
+			  if (typeof mapFn !== 'undefined') {
+				// 5. else
+				// 5. a If IsCallable(mapfn) is false, throw a TypeError exception.
+				if (!isCallable(mapFn)) {
+				  throw new TypeError('Array.from: when provided, the second argument must be a function');
+				}
+
+				// 5. b. If thisArg was supplied, let T be thisArg; else let T be undefined.
+				if (arguments.length > 2) {
+				  T = arguments[2];
+				}
+			  }
+
+			  // 10. Let lenValue be Get(items, "length").
+			  // 11. Let len be ToLength(lenValue).
+			  var len = toLength(items.length);
+
+			  // 13. If IsConstructor(C) is true, then
+			  // 13. a. Let A be the result of calling the [[Construct]] internal method 
+			  // of C with an argument list containing the single item len.
+			  // 14. a. Else, Let A be ArrayCreate(len).
+			  var A = isCallable(C) ? Object(new C(len)) : new Array(len);
+
+			  // 16. Let k be 0.
+			  var k = 0;
+			  // 17. Repeat, while k < len… (also steps a - h)
+			  var kValue;
+			  while (k < len) {
+				kValue = items[k];
+				if (mapFn) {
+				  A[k] = typeof T === 'undefined' ? mapFn(kValue, k) : mapFn.call(T, kValue, k);
+				} else {
+				  A[k] = kValue;
+				}
+				k += 1;
+			  }
+			  // 18. Let putStatus be Put(A, "length", len, true).
+			  A.length = len;
+			  // 20. Return A.
+			  return A;
+			};
+		  }());
+		}
+
+        if (!Function.prototype.bind) {
+            Function.prototype.bind = function (oThis) {
+                if (typeof this !== 'function') {
+                    // closest thing possible to the ECMAScript 5
+                    // internal IsCallable function
+                    throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
+                }
+
+                var aArgs = Array.prototype.slice.call(arguments, 1),
+                    fToBind = this,
+                    fNOP = function () { },
+                    fBound = function () {
+                        return fToBind.apply(this instanceof fNOP && oThis
+                               ? this
+                               : oThis,
+                               aArgs.concat(Array.prototype.slice.call(arguments)));
+                    };
+
+                fNOP.prototype = this.prototype;
+                fBound.prototype = new fNOP();
+
+                return fBound;
+            };
+        }
+
+        // Production steps of ECMA-262, Edition 5, 15.4.4.18
+        // Reference: http://es5.github.io/#x15.4.4.18
+        if (!Array.prototype.forEach) {
+
+            Array.prototype.forEach = function (callback/*, thisArg*/) {
+
+                var T, k;
+
+                if (this == null) {
+                    throw new TypeError('this is null or not defined');
+                }
+
+                // 1. Let O be the result of calling toObject() passing the
+                // |this| value as the argument.
+                var O = Object(this);
+
+                // 2. Let lenValue be the result of calling the Get() internal
+                // method of O with the argument "length".
+                // 3. Let len be toUint32(lenValue).
+                var len = O.length >>> 0;
+
+                // 4. If isCallable(callback) is false, throw a TypeError exception. 
+                // See: http://es5.github.com/#x9.11
+                if (typeof callback !== 'function') {
+                    throw new TypeError(callback + ' is not a function');
+                }
+
+                // 5. If thisArg was supplied, let T be thisArg; else let
+                // T be undefined.
+                if (arguments.length > 1) {
+                    T = arguments[1];
+                }
+
+                // 6. Let k be 0
+                k = 0;
+
+                // 7. Repeat, while k < len
+                while (k < len) {
+
+                    var kValue;
+
+                    // a. Let Pk be ToString(k).
+                    //    This is implicit for LHS operands of the in operator
+                    // b. Let kPresent be the result of calling the HasProperty
+                    //    internal method of O with argument Pk.
+                    //    This step can be combined with c
+                    // c. If kPresent is true, then
+                    if (k in O) {
+
+                        // i. Let kValue be the result of calling the Get internal
+                        // method of O with argument Pk.
+                        kValue = O[k];
+
+                        // ii. Call the Call internal method of callback with T as
+                        // the this value and argument list containing kValue, k, and O.
+                        callback.call(T, kValue, k, O);
+                    }
+                    // d. Increase k by 1.
+                    k++;
+                }
+                // 8. return undefined
+            };
+        }
+
+        // Production steps of ECMA-262, Edition 5, 15.4.4.14
+        // Reference: http://es5.github.io/#x15.4.4.14
+        if (!Array.prototype.indexOf) {
+            Array.prototype.indexOf = function (searchElement, fromIndex) {
+
+                var k;
+
+                // 1. Let o be the result of calling ToObject passing
+                //    the this value as the argument.
+                if (this == null) {
+                    throw new TypeError('"this" is null or not defined');
+                }
+
+                var o = Object(this);
+
+                // 2. Let lenValue be the result of calling the Get
+                //    internal method of o with the argument "length".
+                // 3. Let len be ToUint32(lenValue).
+                var len = o.length >>> 0;
+
+                // 4. If len is 0, return -1.
+                if (len === 0) {
+                    return -1;
+                }
+
+                // 5. If argument fromIndex was passed let n be
+                //    ToInteger(fromIndex); else let n be 0.
+                var n = fromIndex | 0;
+
+                // 6. If n >= len, return -1.
+                if (n >= len) {
+                    return -1;
+                }
+
+                // 7. If n >= 0, then Let k be n.
+                // 8. Else, n<0, Let k be len - abs(n).
+                //    If k is less than 0, then let k be 0.
+                k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
+
+                // 9. Repeat, while k < len
+                while (k < len) {
+                    // a. Let Pk be ToString(k).
+                    //   This is implicit for LHS operands of the in operator
+                    // b. Let kPresent be the result of calling the
+                    //    HasProperty internal method of o with argument Pk.
+                    //   This step can be combined with c
+                    // c. If kPresent is true, then
+                    //    i.  Let elementK be the result of calling the Get
+                    //        internal method of o with the argument ToString(k).
+                    //   ii.  Let same be the result of applying the
+                    //        Strict Equality Comparison Algorithm to
+                    //        searchElement and elementK.
+                    //  iii.  If same is true, return k.
+                    if (k in o && o[k] === searchElement) {
+                        return k;
+                    }
+                    k++;
+                }
+                return -1;
+            };
+        }
+    </script>
+
+
+       <!-- Google Tag Manager -->
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-T5WRQ2"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script>(function (w, d, s, l, i) {
+    w[l] = w[l] || []; w[l].push({
+        'gtm.start':
+        new Date().getTime(), event: 'gtm.js'
+    }); var f = d.getElementsByTagName(s)[0],
+    j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+    '//www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+})(window, document, 'script', 'dataLayer', 'GTM-T5WRQ2');</script>
+<!-- End Google Tag Manager -->
+
+
+    <div id="wrapper">
+        <div id="navigation">
+            <a href="//www.joygame.com/" id="Lnkregister" class="register" target="_blank">Üye Ol</a>
+            <a href="//bill.joygame.com/" id="Lnkjoypara" class="joypara" target="_blank">Joypara</a>
+            <a href="//www.joygame.com/forum/goley/" id="Lnkforum" class="forum" target="_blank">Forum</a>
+            <a href="//www.joygame.com/goley/" id="Lnkorder" class="ordered" target="_blank">Sıralama</a>
+            <a href="//www.joygame.com/goley/CezaSistemi" id="Lnksecurity" class="security" target="_blank">Güvenlik</a>
+            <a href="//www.joygame.com/destek/faq.aspx?catId=59" id="Lnksupport" class="support" target="_blank">Destek</a>
+            <a href="//www.joygame.com/goley/SSS" id="Lnkfaq" class="faq" target="_blank">SSS</a>
+        </div>
+        <div id="launcherWrapper">
+            <div class="left sliderArea">
+
+                
+            </div>
+            <div class="announcements-area">
+                <div class="title-area"></div>  
+                <div class="table-area">
+                    <table id="announcements">
+                        
+                                <tr>
+                                    <td class="icon">
+                                        <img src="images/list-item.png" alt="" /></td>
+                                    <td class="text">
+                                        <a href="//joy.ac/4h7g" target="_blank">Sömestr Harca Kazan Kampanyası</a></td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="icon">
+                                        <img src="images/list-item.png" alt="" /></td>
+                                    <td class="text">
+                                        <a href="//promo.joygame.com/#/axasigorta-promo" target="_blank">AXA Sigorta Facebook Sayfasını Beğen 200 JP Senin Olsun</a></td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="icon">
+                                        <img src="images/list-item.png" alt="" /></td>
+                                    <td class="text">
+                                        <a href="//www.joygame.com/goley/Kampanya/16-18-aralik-harca-kazan-kampanyasi-4350" target="_blank">16-18 Aralık Harca Kazan Kampanyası</a></td>
+                                </tr>
+                            
+                                <tr>
+                                    <td class="icon">
+                                        <img src="images/list-item.png" alt="" /></td>
+                                    <td class="text">
+                                        <a href="//www.joygame.com/goley/Kampanya/14-20-kasim-harca-kazan-kampanyasi-4344" target="_blank">14-20 Kasım Harca Kazan kampanyası</a></td>
+                                </tr>
+                            
+
+                    </table>
+                    <div id="announcements-bottom">
+                        <div id="socialArea">
+                            <a href="//www.facebook.com/goleyjoygame" id="lnkFb" target="_blank" class="fb" style="background: url(http://cdn.joy.ac/i/647908713/5ar8.png);"></a>
+                            <a href="//www.youtube.com/user/goleyjoygame" id="lnkYoutube" target="_blank" class="yb" style="background: url(http://cdn.joy.ac/i/647908713/5arx.png);"></a>
+                            <a href="//twitter.com/GoleyJoygame" id="lnkTwitter" target="_blank" class="tw" style="background: url(http://cdn.joy.ac/i/647908713/5ar3.png);"></a>
+                            <a href="//plus.google.com/u/0/b/108067357069683963065/108067357069683963065/posts" id="lnkGoogle" target="_blank" class="gp" style="background: url(http://cdn.joy.ac/i/647908713/5arb.png);"></a>
+                        </div>
+                        <div class="allLink">
+                            <a href="#">Tüm duyurular...</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="js/jquery.1.10.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery.slides.min.js"></script>
+    <script type="text/javascript">
+        var slideCount = $(".sliderArea a").length;
+        if (slideCount == 0) {
+            $("#launcherWrapper .sliderArea").show();
+            $('#launcherWrapper .sliderArea').html('<a target="_blank" href="https://www.facebook.com/goleyjoygame"><img src="images/slider1.jpg" alt="Goley" /></a>');
+        }
+        else if (slideCount == 1) {
+            $("#launcherWrapper .sliderArea").show();
+        }
+        else {
+            $(function () {
+                $('.sliderArea').slidesjs({
+                    width: 465,
+                    height: 220,
+                    play: {
+                        active: true,
+                        interval: 5000,
+                        auto: true,
+                        pauseOnHover: true,
+                        restartDelay: 5000
+                    },
+                    navigation: {
+                        active: false
+                    },
+                    effect: {
+                        slide: {
+                            speed: 800
+                        }
+                    }
+                });
+            });
+        }
+    </script>
+   
+
+
+
+
+
+
+
+</body>
+</html>

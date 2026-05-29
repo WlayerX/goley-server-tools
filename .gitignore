@@ -1,0 +1,61 @@
+# Build artifacts
+*.exe
+*.dll
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.res
+*.suo
+*.user
+*.ipdb
+*.iobj
+
+# IDA Pro
+*.i64
+*.idb
+*.id0
+*.id1
+*.id2
+*.nam
+*.til
+
+# Logs / debug output
+*.log
+patcher.log
+wrapper.log
+thread_dump.log
+
+# Local test artifacts
+unpacked_Goley_PATCHED.exe
+unpacked_Goley_PATCHED*.exe
+
+# Editor / IDE
+.vscode/
+.vs/
+.idea/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Local secrets / private notes
+SECRETS.md
+NOTES_*.md
+
+# Server build artifacts ve runtime
+server/bin/
+server/logs/
+server/certs/
+server/go.sum
+
+# Joygame'in patch server'inin servis ettigi orijinal binary'ler.
+# Repoya commit edilmez; kendi Goley install'unuzdan kopyalayin.
+server/web/launcher/chagu/Real_Server_Patch/*.exe
+server/web/launcher/chagu/Real_Server_Patch/*.dll

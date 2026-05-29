@@ -1,0 +1,97 @@
+{
+  "_comment": [
+    "Machine-readable record of every binary patch applied to unpacked_Goley_.exe.",
+    "ImageBase is 0x00400000. Addresses below are absolute (image base + RVA).",
+    "When you change this file, update docs/IDA_PATCHES.md too.",
+    "",
+    "save_patched.py reads this with --apply to re-create unpacked_Goley_PATCHED.exe",
+    "without needing an interactive IDA session for each patch."
+  ],
+
+  "target": {
+    "input":      "C:\\Joygame\\Goley\\BinaryTr\\unpacked_Goley_.exe",
+    "output":     "C:\\Joygame\\Goley\\BinaryTr\\unpacked_Goley_PATCHED.exe",
+    "image_base": "0x00400000"
+  },
+
+  "patches": [
+    {
+      "id":        "P-1",
+      "name":      "GameGuard error reporter prologue",
+      "addr":      "0x00D39666",
+      "comment_function": "sub_D393F0 -- if(strlen(buf)) MessageBoxA(...)",
+      "comment":   "Replace prologue with xor eax,eax; ret 4 -- function becomes no-op.",
+      "size":      5,
+      "original_hint": "any normal x86 prologue (push ebp; mov ebp,esp; ...)",
+      "patched":   "33C0C20400"
+    },
+    {
+      "id":        "P-2",
+      "name":      "nProtect event callback always-success",
+      "addr":      "0x00D35720",
+      "comment_function": "sub_D35720 -- switch(event_code) error reporter",
+      "comment":   "Replace prologue with mov eax,1; ret 8 -- every event reports success without setting byte_12BAA08 or zeroing init_ok flag.",
+      "size":      8,
+      "original_hint": "55 8B EC 8B 45 08 05 17 FC FF FF ... (prologue + switch)",
+      "patched":   "B801000000C20800"
+    },
+    {
+      "id":        "P-3",
+      "name":      "WinMain TR exit-after-Please-run-Goley jmp NOP",
+      "addr":      "0x00D3DF0E",
+      "comment_function": "sub_D3D960 (WinMain) -- 'Please run Goley.exe' MessageBoxW + jmp LABEL_168 (return 0). NOP'larsak MessageBoxW cagrilir (zaten user32 inline patch ile no-op) ama jmp atlanir -> WinMain devam eder.",
+      "size":      5,
+      "original_hint": "E9 33 0E 00 00 (jmp rel32 +0xE33 -> 0xD3ED46 = LABEL_168)",
+      "patched":   "9090909090"
+    },
+    {
+      "id":        "P-4",
+      "name":      "WinMain TR alloc-success-then-exit jmp NOP",
+      "addr":      "0x00D3DF57",
+      "comment_function": "sub_D3D960 -- mov dword_12BBC08, esi sonrasi jmp loc_D3ED46.",
+      "size":      5,
+      "original_hint": "E9 EA 0D 00 00",
+      "patched":   "9090909090"
+    },
+    { "id": "P-5",  "name": "WinMain exit jmp #1", "addr": "0x00D3DC8D", "size": 5, "patched": "9090909090" },
+    { "id": "P-6",  "name": "WinMain exit jmp #2", "addr": "0x00D3DCD2", "size": 5, "patched": "9090909090" },
+    { "id": "P-7",  "name": "WinMain exit jmp #3", "addr": "0x00D3DCE7", "size": 5, "patched": "9090909090" },
+    { "id": "P-8",  "name": "WinMain exit jmp #6 (ID region exit)", "addr": "0x00D3E156", "size": 5, "patched": "9090909090" },
+    { "id": "P-9",  "name": "WinMain exit jmp #7 (ID alloc-success exit)", "addr": "0x00D3E19F", "size": 5, "patched": "9090909090" },
+    { "id": "P-10", "name": "WinMain exit jmp #8 (VN region exit)", "addr": "0x00D3E317", "size": 5, "patched": "9090909090" },
+    { "id": "P-11", "name": "WinMain exit jmp #9", "addr": "0x00D3E620", "size": 5, "patched": "9090909090" },
+    { "id": "P-12", "name": "WinMain exit jmp #10", "addr": "0x00D3E67A", "size": 5, "patched": "9090909090" },
+    { "id": "P-13", "name": "WinMain exit jmp #11", "addr": "0x00D3E977", "size": 5, "patched": "9090909090" },
+    { "id": "P-14", "name": "WinMain exit jmp #12", "addr": "0x00D3E9FB", "size": 5, "patched": "9090909090" },
+    {
+      "id":        "P-15",
+      "name":      "BugTrap BT_SaveSnapshot call NOP (dialog tetikleyici)",
+      "addr":      "0x00D3669E",
+      "comment_function": "Error reporter fonksiyonu, BT_SaveSnapshot @ IAT 0x019983BC",
+      "comment":   "call dword ptr [0x019983BC] (FF 15 BC 83 99 01) -> 6 byte NOP. Dialog hic acilmaz cunku snapshot save edilmez.",
+      "size":      6,
+      "original_hint": "FF 15 BC 83 99 01",
+      "patched":   "909090909090"
+    },
+    {
+      "id":        "P-16",
+      "name":      "BugTrap BT_SendSnapshot call NOP (dialog UI tetikleyici)",
+      "addr":      "0x00D366A6",
+      "comment_function": "Error reporter fonksiyonu, BT_SendSnapshot @ IAT 0x019983C0 (Save'in hemen sonrasi)",
+      "comment":   "call dword ptr [0x019983C0] (FF 15 C0 83 99 01) -> 6 byte NOP. Send asla cagrilmaz, 'Send Bug Report' dialog acilmaz.",
+      "size":      6,
+      "original_hint": "FF 15 C0 83 99 01",
+      "patched":   "909090909090"
+    }
+  ],
+
+  "reverted_patches": [
+    {
+      "id":        "P-3",
+      "name":      "nProtect event dispatcher stub (REVERTED)",
+      "addr":      "0x008E70E0",
+      "comment":   "Stub-prologue patch (mov eax,1; ret 12). Caused Working Set to regress from 42 MB back to 26 MB because legitimate init also bypassed. Do not re-apply without a surgical replacement.",
+      "patched":   "B801000000C20C00"
+    }
+  ]
+}
