@@ -14,6 +14,7 @@
 #include "../bypass/hwbp.h"
 #include "../bypass/veh_handler.h"
 #include "../bypass/anticheat.h"
+#include "../bypass/syscalls.h"
 
 DWORD WINAPI PatchThread(LPVOID lpParam) {
     // =========================================================
@@ -99,6 +100,12 @@ DWORD WINAPI PatchThread(LPVOID lpParam) {
     Log("PatchThread starting (VEH+HWBP+MinHook refresh-loop mode)");
 
     // ScyllaHide DllMain'de yuklendi.
+
+    // Build the direct-syscall gadget for NtQueryInformationProcess FIRST --
+    // it parses the CLEAN ntdll stub (mov eax, ssn). Must run before
+    // InitCreateProcessHooks() MinHooks the same stub, otherwise we'd capture a
+    // patched prologue. Provides unhooked ground truth for the NtQIP comparison.
+    InitDirectSyscalls();
 
     // Install kernel32!CreateProcessA/W hooks FIRST so the very first
     // child spawn (typically nProtect's GameMon.des) gets our DLL APC-injected.
@@ -320,6 +327,12 @@ DWORD WINAPI PatchThread(LPVOID lpParam) {
             (nowTick - g_lastThreadDumpTick) > 15000) {
             g_lastThreadDumpTick = nowTick;
             DumpThreadEips();
+            // Ground-truth NtQIP comparison (Commit C): hooked stub vs direct
+            // gadget. A divergence flags that our hook is rewriting ExitStatus
+            // for some caller -- or, on self, confirms the kernel's real view.
+            CompareNtQipHookedVsReal(GetCurrentProcess(), "self");
+            if (g_hGameMonProcess)
+                CompareNtQipHookedVsReal(g_hGameMonProcess, "gamemon");
         }
 
         // Periyodik modules snapshot -- nProtect/GameGuard sonradan
