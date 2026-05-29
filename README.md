@@ -1,4 +1,4 @@
-# goley-private-server
+# Goley Server Tools
 
 Özel ağ ortamında Goley istemci–sunucu yığınının uçtan uca çalıştırılması için tasarlanmış platform.
 
@@ -131,6 +131,10 @@ Tüm teknik referans `docs/` altında merkezi olarak yönetilir. Giriş noktası
 | Client geliştirme | [docs/client/cli-reference.md](docs/client/cli-reference.md) |
 | Backend geliştirme | [docs/server/services.md](docs/server/services.md) |
 | Sorun giderme | [docs/operations/runbook.md](docs/operations/runbook.md) |
+
+## Teşekkürler
+Projenin geliştirilme sürecini mümkün kılan projeye aşağıda ki bağlantıdan ulaşabilirsiniz.
+- github.com/0x1-1/revival 
 
 ---
 
