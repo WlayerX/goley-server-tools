@@ -8,6 +8,9 @@
 BOOL PatchStdcallStub(DWORD funcVA, int retBytes, const char* name);
 BOOL PatchMessageBoxStub(DWORD funcVA, const char* name);
 
+// Inline-patch a function to: jmp $ (infinite loop/hang)
+BOOL PatchHangStub(DWORD funcVA, const char* name);
+
 // Fake MessageBoxW that returns IDOK without showing any dialog
 int WINAPI FakeMessageBoxW(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType);
 

@@ -60,6 +60,12 @@ echo.
 :: Oyunu baslat
 echo [5/5] Goley baslatiliyor...
 echo.
+echo       GameGuard sahtelestiriliyor...
+if not exist "C:\Joygame\Goley\BinaryTr\GameGuard.des.bak" (
+    copy /y "C:\Joygame\Goley\BinaryTr\GameGuard.des" "C:\Joygame\Goley\BinaryTr\GameGuard.des.bak" >nul 2>&1
+)
+copy /y "%~dp0src\tool\dummy_gg.exe" "C:\Joygame\Goley\BinaryTr\GameGuard.des" >nul 2>&1
+
 "%~dp0src\tool\revival_tool.exe" launch
 echo.
 

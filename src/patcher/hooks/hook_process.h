@@ -3,6 +3,7 @@
 
 VOID WINAPI HookedExitProcess(UINT uExitCode);
 BOOL WINAPI HookedTerminateProcess(HANDLE hProc, UINT uExitCode);
+BOOL WINAPI HookedGetExitCodeProcess(HANDLE hProcess, LPDWORD lpExitCode);
 int HookKillApis();
 BOOL ApcInjectChild(HANDLE hProcess, HANDLE hThread, DWORD childPid);
 BOOL WINAPI HookedCreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes, LPSECURITY_ATTRIBUTES lpThreadAttributes, BOOL bInheritHandles, DWORD dwCreationFlags, LPVOID lpEnvironment, LPCSTR lpCurrentDirectory, LPSTARTUPINFOA lpStartupInfo, LPPROCESS_INFORMATION lpProcessInformation);

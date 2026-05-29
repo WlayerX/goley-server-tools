@@ -49,14 +49,21 @@ extern DWORD g_lastThreadDumpTick;
 // --- Original function trampolines ---
 extern ExitProcess_t      g_origExitProcess;
 extern TerminateProcess_t g_origTerminateProcess;
+extern GetExitCodeProcess_t g_origGetExitCodeProcess;
+extern NtQueryInformationProcess_t g_origNtQueryInformationProcess;
 extern CreateProcessA_t   g_origCreateProcessA;
 extern CreateProcessW_t   g_origCreateProcessW;
 
 extern WaitForSingleObject_t    g_origWFSO;
 extern WaitForSingleObjectEx_t  g_origWFSOEx;
 extern WaitForMultipleObjects_t g_origWFMO;
+extern WaitForMultipleObjectsEx_t g_origWFMOEx;
+extern MsgWaitForMultipleObjects_t g_origMsgWFMO;
+extern MsgWaitForMultipleObjectsEx_t g_origMsgWFMOEx;
 extern NtWaitForSingleObject_t  g_origNtWFSO;
 extern NtQueryObject_t          g_pNtQueryObject;
+
+extern HANDLE g_hGameMonProcess;
 
 extern NMRunParamSetParam_t      g_origNMRunSetParam;
 extern NMRunParamSetParam2_t     g_origNMRunSetParam2;

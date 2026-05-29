@@ -26,6 +26,37 @@ BOOL WINAPI HookedTerminateProcess(HANDLE hProc, UINT uExitCode) {
     return g_origTerminateProcess ? g_origTerminateProcess(hProc, uExitCode) : FALSE;
 }
 
+BOOL WINAPI HookedGetExitCodeProcess(HANDLE hProcess, LPDWORD lpExitCode) {
+    BOOL ret = g_origGetExitCodeProcess(hProcess, lpExitCode);
+    if (ret && lpExitCode) {
+        if (*lpExitCode != STILL_ACTIVE) {
+            char buf[256];
+            wsprintfA(buf, "[HOOK] GetExitCodeProcess(hProc=0x%p) -> OVERRIDING error code 0x%X to 0 (Success)", hProcess, *lpExitCode);
+            Log(buf);
+            *lpExitCode = 0;
+        }
+    }
+    return ret;
+}
+
+typedef LONG (NTAPI *NtQueryInformationProcess_t)(HANDLE, ULONG, PVOID, ULONG, PULONG);
+NtQueryInformationProcess_t g_origNtQIP = NULL;
+
+LONG NTAPI HookedNtQueryInformationProcess(HANDLE ProcessHandle, ULONG ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength) {
+    LONG status = g_origNtQIP(ProcessHandle, ProcessInformationClass, ProcessInformation, ProcessInformationLength, ReturnLength);
+    if (status >= 0 && ProcessInformationClass == 0 && ProcessInformation) {
+        // ProcessBasicInformation -> ExitStatus is at offset 0
+        PDWORD pExitStatus = (PDWORD)ProcessInformation;
+        if (*pExitStatus != STILL_ACTIVE && *pExitStatus != 0) {
+            char buf[256];
+            wsprintfA(buf, "[HOOK] NtQueryInformationProcess(hProc=0x%p) -> OVERRIDING ExitStatus 0x%X to 0", ProcessHandle, *pExitStatus);
+            Log(buf);
+            *pExitStatus = 0;
+        }
+    }
+    return status;
+}
+
 
 int HookKillApis() {
     int hooks = 0;
@@ -199,6 +230,10 @@ BOOL WINAPI HookedCreateProcessA(
               childPid, hProcess, hThread, addedSuspend);
     Log(buf);
 
+    if (lstrcmpiA(childBase, "GameGuard.des") == 0) {
+        g_hGameMonProcess = hProcess;
+    }
+
     ApcInjectChild(hProcess, hThread, childPid);
 
     // If WE added CREATE_SUSPENDED (caller didn't ask for it), we must
@@ -307,6 +342,10 @@ BOOL WINAPI HookedCreateProcessW(
               childPid, hProcess, hThread, addedSuspend);
     Log(buf);
 
+    if (lstrcmpiA(childBase, "GameGuard.des") == 0) {
+        g_hGameMonProcess = hProcess;
+    }
+
     ApcInjectChild(hProcess, hThread, childPid);
 
     if (addedSuspend) {
@@ -363,7 +402,28 @@ BOOL InitCreateProcessHooks() {
         wsprintfA(buf, "MH_EnableHook(ALL) status=%d", s); Log(buf);
         return FALSE;
     }
-    Log(allOk ? "MinHook: CreateProcessA/W hooks ACTIVE"
+    
+    // GetExitCodeProcess in kernelbase.dll
+    HMODULE hKernelBase = GetModuleHandleA("kernelbase.dll");
+    if (hKernelBase) {
+        PVOID pGECP = GetProcAddress(hKernelBase, "GetExitCodeProcess");
+        if (pGECP) {
+            s = MH_CreateHook(pGECP, (LPVOID)&HookedGetExitCodeProcess, (LPVOID*)&g_origGetExitCodeProcess);
+            if (s == MH_OK) MH_EnableHook(pGECP);
+        }
+    }
+    
+    // NtQueryInformationProcess in ntdll.dll
+    HMODULE hNtdll = GetModuleHandleA("ntdll.dll");
+    if (hNtdll) {
+        PVOID pNtQIP = GetProcAddress(hNtdll, "NtQueryInformationProcess");
+        if (pNtQIP) {
+            s = MH_CreateHook(pNtQIP, (LPVOID)&HookedNtQueryInformationProcess, (LPVOID*)&g_origNtQIP);
+            if (s == MH_OK) MH_EnableHook(pNtQIP);
+        }
+    }
+    
+    Log(allOk ? "MinHook: CreateProcessA/W and NtQueryInformationProcess hooks ACTIVE"
               : "MinHook: hooks partially installed (see warnings above)");
     return allOk;
 }

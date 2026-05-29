@@ -3,14 +3,19 @@
 #include "../core/helpers.h"
 
 DWORD WINAPI HookedWaitForSingleObject(HANDLE hObj, DWORD dwTimeout) {
+    static volatile LONG ggBypassed = 0;
     BOOL longWait = (dwTimeout == INFINITE) || (dwTimeout >= 1000);
-    if (longWait && EnterHook()) {
+    
+    if (ggBypassed == 0 && EnterHook()) {
         char name[300];
-        DescribeHandle(hObj, name, sizeof(name));
         char buf[600];
-        wsprintfA(buf, "[WFSO] TID=%lu h=0x%p timeout=%lu name='%s' caller=0x%p",
-                  GetCurrentThreadId(), hObj, dwTimeout, name, _ReturnAddress());
-        Log(buf);
+        DescribeHandle(hObj, name, sizeof(name));
+        
+        if (longWait) {
+            wsprintfA(buf, "[WFSO] TID=%lu h=0x%p timeout=%lu name='%s' caller=0x%p",
+                      GetCurrentThreadId(), hObj, dwTimeout, name, _ReturnAddress());
+            Log(buf);
+        }
 
         // nProtect event auto-signal: GameMon.des normalde bu event'i
         // signal eder. Biz GameMon'u calistirmiyoruz, bu yuzden event
@@ -38,9 +43,11 @@ DWORD WINAPI HookedWaitForSingleObject(HANDLE hObj, DWORD dwTimeout) {
         }
 
         if (isNProtectEvent) {
-            wsprintfA(buf, "  *** nProtect EVENT DETECTED: '%s' -- auto-signaling ***", name);
-            Log(buf);
+            char buf2[600];
+            wsprintfA(buf2, "  *** nProtect EVENT DETECTED: '%s' (timeout=%lu) -- auto-signaling ***", name, dwTimeout);
+            Log(buf2);
             SetEvent(hObj);
+            InterlockedExchange(&ggBypassed, 1);
         }
         // Isimsiz handle + INFINITE timeout: nProtect anonim event
         // kullanabilir. Ilk 90 sn icinde 100ms poll ile dene, sonra
@@ -94,15 +101,20 @@ DWORD WINAPI HookedWaitForSingleObject(HANDLE hObj, DWORD dwTimeout) {
 
 DWORD WINAPI HookedWaitForSingleObjectEx(HANDLE hObj, DWORD dwTimeout,
                                                 BOOL bAlertable) {
+    static volatile LONG ggBypassedEx = 0;
     BOOL longWait = (dwTimeout == INFINITE) || (dwTimeout >= 1000);
-    if (longWait && EnterHook()) {
+    
+    if (ggBypassedEx == 0 && EnterHook()) {
         char name[300];
-        DescribeHandle(hObj, name, sizeof(name));
         char buf[600];
-        wsprintfA(buf, "[WFSOEx] TID=%lu h=0x%p timeout=%lu alertable=%d name='%s' caller=0x%p",
-                  GetCurrentThreadId(), hObj, dwTimeout, bAlertable, name,
-                  _ReturnAddress());
-        Log(buf);
+        DescribeHandle(hObj, name, sizeof(name));
+        
+        if (longWait) {
+            wsprintfA(buf, "[WFSOEx] TID=%lu h=0x%p timeout=%lu alertable=%d name='%s' caller=0x%p",
+                      GetCurrentThreadId(), hObj, dwTimeout, bAlertable, name,
+                      _ReturnAddress());
+            Log(buf);
+        }
 
         // nProtect auto-signal (ayni mantik WFSO ile)
         BOOL isNProtectEvent = FALSE;
@@ -126,9 +138,11 @@ DWORD WINAPI HookedWaitForSingleObjectEx(HANDLE hObj, DWORD dwTimeout,
         }
 
         if (isNProtectEvent) {
-            wsprintfA(buf, "  *** nProtect EVENT (Ex) DETECTED: '%s' -- auto-signaling ***", name);
-            Log(buf);
+            char buf2[600];
+            wsprintfA(buf2, "  *** nProtect EVENT (Ex) DETECTED: '%s' -- auto-signaling ***", name);
+            Log(buf2);
             SetEvent(hObj);
+            InterlockedExchange(&ggBypassedEx, 1);
         }
         LeaveHook();
     }
@@ -148,6 +162,31 @@ DWORD WINAPI HookedWaitForMultipleObjects(DWORD nCount,
                                                   const HANDLE* pHandles,
                                                   BOOL bWaitAll,
                                                   DWORD dwTimeout) {
+    if (g_hGameMonProcess && pHandles && !bWaitAll && nCount == 2) {
+        int gameMonIndex = -1;
+        for (DWORD i = 0; i < nCount; i++) {
+            if (pHandles[i] == g_hGameMonProcess) {
+                gameMonIndex = i;
+                break;
+            }
+        }
+        
+        if (gameMonIndex != -1) {
+            int eventIndex = (gameMonIndex == 0) ? 1 : 0;
+            HANDLE hEvent = pHandles[eventIndex];
+            
+            if (EnterHook()) {
+                char buf[256];
+                wsprintfA(buf, "  *** GameMon WFMO detected! Auto-signaling event h=0x%p ***", hEvent);
+                Log(buf);
+                LeaveHook();
+            }
+            
+            SetEvent(hEvent);
+            return WAIT_OBJECT_0 + eventIndex;
+        }
+    }
+
     BOOL longWait = (dwTimeout == INFINITE) || (dwTimeout >= 1000);
     if (longWait && pHandles && EnterHook()) {
         char buf[2048];
@@ -173,11 +212,176 @@ DWORD WINAPI HookedWaitForMultipleObjects(DWORD nCount,
 }
 
 
+DWORD WINAPI HookedWaitForMultipleObjectsEx(DWORD nCount,
+                                            const HANDLE* pHandles,
+                                            BOOL bWaitAll,
+                                            DWORD dwTimeout,
+                                            BOOL bAlertable) {
+    if (g_hGameMonProcess && pHandles && !bWaitAll && nCount == 2) {
+        int gameMonIndex = -1;
+        for (DWORD i = 0; i < nCount; i++) {
+            if (pHandles[i] == g_hGameMonProcess) {
+                gameMonIndex = i;
+                break;
+            }
+        }
+        
+        if (gameMonIndex != -1) {
+            int eventIndex = (gameMonIndex == 0) ? 1 : 0;
+            HANDLE hEvent = pHandles[eventIndex];
+            
+            if (EnterHook()) {
+                char buf[256];
+                wsprintfA(buf, "  *** GameMon WFMOEx detected! Auto-signaling event h=0x%p ***", hEvent);
+                Log(buf);
+                LeaveHook();
+            }
+            
+            SetEvent(hEvent);
+            return WAIT_OBJECT_0 + eventIndex;
+        }
+    }
+
+    BOOL longWait = (dwTimeout == INFINITE) || (dwTimeout >= 1000);
+    if (longWait && pHandles && EnterHook()) {
+        char buf[2048];
+        int off = wsprintfA(buf, "[WFMOEx] TID=%lu n=%lu waitAll=%d timeout=%lu alertable=%d",
+                            GetCurrentThreadId(), nCount, bWaitAll, dwTimeout, bAlertable);
+        for (DWORD i = 0; i < nCount && i < 8 && off < 1900; i++) {
+            char name[280];
+            DescribeHandle(pHandles[i], name, sizeof(name));
+            off += wsprintfA(buf + off, "; h%lu=0x%p '%.200s'",
+                             i, pHandles[i], name);
+        }
+        Log(buf);
+        LeaveHook();
+    }
+    DWORD r = g_origWFMOEx(nCount, pHandles, bWaitAll, dwTimeout, bAlertable);
+    if (longWait && EnterHook()) {
+        char buf[160];
+        wsprintfA(buf, "  [WFMOEx] TID=%lu -> %lu", GetCurrentThreadId(), r);
+        Log(buf);
+        LeaveHook();
+    }
+    return r;
+}
+
+DWORD WINAPI HookedMsgWaitForMultipleObjects(DWORD nCount,
+                                             const HANDLE* pHandles,
+                                             BOOL fWaitAll,
+                                             DWORD dwTimeout,
+                                             DWORD dwWakeMask) {
+    if (g_hGameMonProcess && pHandles && !fWaitAll && nCount == 2) {
+        int gameMonIndex = -1;
+        for (DWORD i = 0; i < nCount; i++) {
+            if (pHandles[i] == g_hGameMonProcess) {
+                gameMonIndex = i;
+                break;
+            }
+        }
+        
+        if (gameMonIndex != -1) {
+            int eventIndex = (gameMonIndex == 0) ? 1 : 0;
+            HANDLE hEvent = pHandles[eventIndex];
+            
+            if (EnterHook()) {
+                char buf[256];
+                wsprintfA(buf, "  *** GameMon MsgWFMO detected! Auto-signaling event h=0x%p ***", hEvent);
+                Log(buf);
+                LeaveHook();
+            }
+            
+            SetEvent(hEvent);
+            return WAIT_OBJECT_0 + eventIndex;
+        }
+    }
+
+    BOOL longWait = (dwTimeout == INFINITE) || (dwTimeout >= 1000);
+    if (longWait && pHandles && EnterHook()) {
+        char buf[2048];
+        int off = wsprintfA(buf, "[MsgWFMO] TID=%lu n=%lu waitAll=%d timeout=%lu wakeMask=0x%X",
+                            GetCurrentThreadId(), nCount, fWaitAll, dwTimeout, dwWakeMask);
+        for (DWORD i = 0; i < nCount && i < 8 && off < 1900; i++) {
+            char name[280];
+            DescribeHandle(pHandles[i], name, sizeof(name));
+            off += wsprintfA(buf + off, "; h%lu=0x%p '%.200s'",
+                             i, pHandles[i], name);
+        }
+        Log(buf);
+        LeaveHook();
+    }
+    DWORD r = g_origMsgWFMO(nCount, pHandles, fWaitAll, dwTimeout, dwWakeMask);
+    if (longWait && EnterHook()) {
+        char buf[160];
+        wsprintfA(buf, "  [MsgWFMO] TID=%lu -> %lu", GetCurrentThreadId(), r);
+        Log(buf);
+        LeaveHook();
+    }
+    return r;
+}
+
+DWORD WINAPI HookedMsgWaitForMultipleObjectsEx(DWORD nCount,
+                                               const HANDLE* pHandles,
+                                               DWORD dwTimeout,
+                                               DWORD dwWakeMask,
+                                               DWORD dwFlags) {
+    if (g_hGameMonProcess && pHandles && nCount == 2) {
+        int gameMonIndex = -1;
+        for (DWORD i = 0; i < nCount; i++) {
+            if (pHandles[i] == g_hGameMonProcess) {
+                gameMonIndex = i;
+                break;
+            }
+        }
+        
+        if (gameMonIndex != -1) {
+            int eventIndex = (gameMonIndex == 0) ? 1 : 0;
+            HANDLE hEvent = pHandles[eventIndex];
+            
+            if (EnterHook()) {
+                char buf[256];
+                wsprintfA(buf, "  *** GameMon MsgWFMOEx detected! Auto-signaling event h=0x%p ***", hEvent);
+                Log(buf);
+                LeaveHook();
+            }
+            
+            SetEvent(hEvent);
+            return WAIT_OBJECT_0 + eventIndex;
+        }
+    }
+
+    BOOL longWait = (dwTimeout == INFINITE) || (dwTimeout >= 1000);
+    if (longWait && pHandles && EnterHook()) {
+        char buf[2048];
+        int off = wsprintfA(buf, "[MsgWFMOEx] TID=%lu n=%lu timeout=%lu wakeMask=0x%X flags=0x%X",
+                            GetCurrentThreadId(), nCount, dwTimeout, dwWakeMask, dwFlags);
+        for (DWORD i = 0; i < nCount && i < 8 && off < 1900; i++) {
+            char name[280];
+            DescribeHandle(pHandles[i], name, sizeof(name));
+            off += wsprintfA(buf + off, "; h%lu=0x%p '%.200s'",
+                             i, pHandles[i], name);
+        }
+        Log(buf);
+        LeaveHook();
+    }
+    DWORD r = g_origMsgWFMOEx(nCount, pHandles, dwTimeout, dwWakeMask, dwFlags);
+    if (longWait && EnterHook()) {
+        char buf[160];
+        wsprintfA(buf, "  [MsgWFMOEx] TID=%lu -> %lu", GetCurrentThreadId(), r);
+        Log(buf);
+        LeaveHook();
+    }
+    return r;
+}
+
+
 void InitWaitHooks() {
     HMODULE hKernel = GetModuleHandleA("kernel32.dll");
     HMODULE hNtdll  = GetModuleHandleA("ntdll.dll");
-    if (!hKernel || !hNtdll) {
-        Log("InitWaitHooks: kernel32/ntdll not loaded");
+    HMODULE hUser32 = GetModuleHandleA("user32.dll");
+    if (!hUser32) hUser32 = LoadLibraryA("user32.dll");
+    if (!hKernel || !hNtdll || !hUser32) {
+        Log("InitWaitHooks: kernel32/ntdll/user32 not loaded");
         return;
     }
     g_pNtQueryObject = (NtQueryObject_t)GetProcAddress(hNtdll, "NtQueryObject");
@@ -193,6 +397,9 @@ void InitWaitHooks() {
         { hKernel, "WaitForSingleObject",    (LPVOID)&HookedWaitForSingleObject,   (LPVOID*)&g_origWFSO   },
         { hKernel, "WaitForSingleObjectEx",  (LPVOID)&HookedWaitForSingleObjectEx, (LPVOID*)&g_origWFSOEx },
         { hKernel, "WaitForMultipleObjects", (LPVOID)&HookedWaitForMultipleObjects,(LPVOID*)&g_origWFMO   },
+        { hKernel, "WaitForMultipleObjectsEx", (LPVOID)&HookedWaitForMultipleObjectsEx,(LPVOID*)&g_origWFMOEx },
+        { hUser32, "MsgWaitForMultipleObjects", (LPVOID)&HookedMsgWaitForMultipleObjects,(LPVOID*)&g_origMsgWFMO },
+        { hUser32, "MsgWaitForMultipleObjectsEx", (LPVOID)&HookedMsgWaitForMultipleObjectsEx,(LPVOID*)&g_origMsgWFMOEx },
     };
     for (int i = 0; i < (int)(sizeof(specs)/sizeof(specs[0])); i++) {
         PVOID p = GetProcAddress(specs[i].mod, specs[i].name);

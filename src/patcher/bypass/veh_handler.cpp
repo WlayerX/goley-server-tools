@@ -239,8 +239,10 @@ LONG CALLBACK VehHandler(PEXCEPTION_POINTERS exc) {
                     char buf[160];
                     wsprintfA(buf, "AV-rescue (invalid EIP 0x%X): simulated RET to 0x%X", eip, retAddr);
                     Log(buf);
+                    return EXCEPTION_CONTINUE_EXECUTION;
+                } else {
+                    return EXCEPTION_CONTINUE_SEARCH;
                 }
-                return EXCEPTION_CONTINUE_EXECUTION;
             }
             __except (EXCEPTION_EXECUTE_HANDLER) {
                 Log("AV-rescue FAILED: invalid EIP and unreadable stack");

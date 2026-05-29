@@ -42,6 +42,38 @@ BOOL PatchMessageBoxStub(DWORD funcVA, const char* name) {
     return PatchStdcallStub(funcVA, 16, name);  // 4 args
 }
 
+BOOL PatchHangStub(DWORD funcVA, const char* name) {
+    if (!funcVA) {
+        char buf[128];
+        wsprintfA(buf, "PatchHangStub: %s VA is NULL, skipped", name);
+        Log(buf);
+        return FALSE;
+    }
+    BYTE patch[2] = { 0xEB, 0xFE }; // jmp short -2 (infinite loop)
+    DWORD oldProt = 0;
+    LPVOID target = (LPVOID)(ULONG_PTR)funcVA;
+    if (!VirtualProtect(target, sizeof(patch), PAGE_EXECUTE_READWRITE, &oldProt)) {
+        char buf[128];
+        wsprintfA(buf, "PatchHangStub: VirtualProtect failed for %s (err=%lu)",
+                  name, GetLastError());
+        Log(buf);
+        return FALSE;
+    }
+    BYTE orig[2];
+    memcpy(orig, target, sizeof(orig));
+    memcpy(target, patch, sizeof(patch));
+
+    DWORD dummy;
+    VirtualProtect(target, sizeof(patch), oldProt, &dummy);
+    FlushInstructionCache(GetCurrentProcess(), target, sizeof(patch));
+
+    char buf[256];
+    wsprintfA(buf, "Patched %s @ 0x%X  orig=%02X%02X -> EB FE (hang loop)",
+              name, funcVA, orig[0], orig[1]);
+    Log(buf);
+    return TRUE;
+}
+
 int WINAPI FakeMessageBoxW(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType) {
     char tbuf[256] = {0};
     char cbuf[256] = {0};

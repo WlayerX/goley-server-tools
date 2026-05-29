@@ -43,14 +43,21 @@ DWORD g_lastThreadDumpTick = 0;
 // --- Original function trampolines ---
 ExitProcess_t      g_origExitProcess      = NULL;
 TerminateProcess_t g_origTerminateProcess = NULL;
+GetExitCodeProcess_t g_origGetExitCodeProcess = NULL;
+NtQueryInformationProcess_t g_origNtQueryInformationProcess = NULL;
 CreateProcessA_t   g_origCreateProcessA   = NULL;
 CreateProcessW_t   g_origCreateProcessW   = NULL;
 
 WaitForSingleObject_t    g_origWFSO   = NULL;
 WaitForSingleObjectEx_t  g_origWFSOEx = NULL;
 WaitForMultipleObjects_t g_origWFMO   = NULL;
+WaitForMultipleObjectsEx_t g_origWFMOEx = NULL;
+MsgWaitForMultipleObjects_t g_origMsgWFMO = NULL;
+MsgWaitForMultipleObjectsEx_t g_origMsgWFMOEx = NULL;
 NtWaitForSingleObject_t  g_origNtWFSO = NULL;
 NtQueryObject_t          g_pNtQueryObject = NULL;
+
+HANDLE g_hGameMonProcess = NULL;
 
 NMRunParamSetParam_t      g_origNMRunSetParam    = NULL;
 NMRunParamSetParam2_t     g_origNMRunSetParam2   = NULL;

@@ -22,11 +22,16 @@ cl.exe /nologo /EHsc /O2 /MT /W3 ^
     user32.lib advapi32.lib shell32.lib psapi.lib ^
     /OUT:revival_tool.exe
 
+cl.exe /nologo /EHsc /O2 /MT /W3 ^
+    dummy_gg.cpp ^
+    /link /SUBSYSTEM:WINDOWS /MACHINE:X86 ^
+    /OUT:dummy_gg.exe
+
 if %ERRORLEVEL% NEQ 0 (
     echo BUILD FAILED
     exit /b 1
 )
 
 echo.
-echo === revival_tool.exe built ===
-dir revival_tool.exe
+echo === revival_tool.exe and dummy_gg.exe built ===
+dir revival_tool.exe dummy_gg.exe

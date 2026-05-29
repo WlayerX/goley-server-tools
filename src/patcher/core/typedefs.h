@@ -7,6 +7,8 @@
 // --- Process / Thread control ---
 typedef VOID (WINAPI *ExitProcess_t)(UINT);
 typedef BOOL (WINAPI *TerminateProcess_t)(HANDLE, UINT);
+typedef BOOL (WINAPI *GetExitCodeProcess_t)(HANDLE, LPDWORD);
+typedef LONG (NTAPI *NtQueryInformationProcess_t)(HANDLE, ULONG, PVOID, ULONG, PULONG);
 
 typedef BOOL (WINAPI *CreateProcessA_t)(
     LPCSTR, LPSTR, LPSECURITY_ATTRIBUTES, LPSECURITY_ATTRIBUTES,
@@ -21,6 +23,9 @@ typedef BOOL (WINAPI *CreateProcessW_t)(
 typedef DWORD (WINAPI *WaitForSingleObject_t)(HANDLE, DWORD);
 typedef DWORD (WINAPI *WaitForSingleObjectEx_t)(HANDLE, DWORD, BOOL);
 typedef DWORD (WINAPI *WaitForMultipleObjects_t)(DWORD, const HANDLE*, BOOL, DWORD);
+typedef DWORD (WINAPI *WaitForMultipleObjectsEx_t)(DWORD, const HANDLE*, BOOL, DWORD, BOOL);
+typedef DWORD (WINAPI *MsgWaitForMultipleObjects_t)(DWORD, const HANDLE*, BOOL, DWORD, DWORD);
+typedef DWORD (WINAPI *MsgWaitForMultipleObjectsEx_t)(DWORD, const HANDLE*, DWORD, DWORD, DWORD);
 typedef LONG  (NTAPI  *NtWaitForSingleObject_t)(HANDLE, BOOLEAN, PLARGE_INTEGER);
 typedef LONG  (NTAPI  *NtQueryObject_t)(HANDLE, ULONG, PVOID, ULONG, PULONG);
 

@@ -102,14 +102,11 @@ DWORD WINAPI PatchThread(LPVOID lpParam) {
     // child spawn (typically nProtect's GameMon.des) gets our DLL APC-injected.
     InitCreateProcessHooks();
 
-    // Wait hooks DISABLED -- they were tripping nProtect's anti-hook
-    // fingerprint check. We now use thread enumeration + GetThreadContext
-    // to read each thread's EIP every 5 seconds (see DumpThreadEips()
-    // below). That tells us which thread is parked in
-    // kernelbase!WaitForSingleObjectEx / ntdll!ZwWaitForSingleObject and
-    // what the return address into Goley_'s code is -- enough to find
-    // the wait site in IDA without ever installing a wait hook.
-    Log("Wait hooks DISABLED -- using thread-EIP polling instead");
+    // Wait hooks ENABLED IMMEDIATELY so we catch the early nProtect wait.
+    // GameGuard might detect this and try to kill the process, but our inline
+    // PatchHangStub (DllMain) will just freeze that anti-debug thread.
+    Log("Wait hooks ENABLED immediately");
+    InitWaitHooks();
 
     HMODULE hMod = GetModuleHandleA(NULL);
     if (!hMod) { Log("GetModuleHandle NULL"); return 1; }
@@ -164,8 +161,8 @@ DWORD WINAPI PatchThread(LPVOID lpParam) {
     if (hKernel) {
         DWORD termVA = (DWORD)(ULONG_PTR)GetProcAddress(hKernel, "TerminateProcess");
         DWORD exitVA = (DWORD)(ULONG_PTR)GetProcAddress(hKernel, "ExitProcess");
-        PatchStdcallStub(termVA, 8, "kernel32!TerminateProcess");
-        PatchStdcallStub(exitVA, 4, "kernel32!ExitProcess");
+        PatchHangStub(termVA, "kernel32!TerminateProcess");
+        PatchHangStub(exitVA, "kernel32!ExitProcess");
     }
 
     // ALSO patch the ntdll-level process kill APIs. Themida-packed code
@@ -180,10 +177,8 @@ DWORD WINAPI PatchThread(LPVOID lpParam) {
     if (hNt) {
         DWORD ntTermProc = (DWORD)(ULONG_PTR)GetProcAddress(hNt, "NtTerminateProcess");
         DWORD rtlExit    = (DWORD)(ULONG_PTR)GetProcAddress(hNt, "RtlExitUserProcess");
-        DWORD ntTermThr  = (DWORD)(ULONG_PTR)GetProcAddress(hNt, "NtTerminateThread");
-        PatchStdcallStub(ntTermProc, 8, "ntdll!NtTerminateProcess");
-        PatchStdcallStub(rtlExit,    4, "ntdll!RtlExitUserProcess");
-        PatchStdcallStub(ntTermThr,  8, "ntdll!NtTerminateThread");
+        PatchHangStub(ntTermProc, "ntdll!NtTerminateProcess");
+        PatchHangStub(rtlExit, "ntdll!RtlExitUserProcess");
         // ntdll!NtCreateUserProcess is the REAL syscall that creates a process
         // on modern Windows. kernel32!CreateProcessA/W and internal variants
         // all funnel through it. Goley_'s Themida bypass goes straight here.
@@ -297,22 +292,7 @@ DWORD WINAPI PatchThread(LPVOID lpParam) {
             g_lastModuleSnapTick = nowTick;
         }
 
-        // (1c) LATE InitWaitHooks. Iki tetikleyici var:
-        //   (a) val_hit + 2 sec  -- Themida'li canli yol, unpack + integrity
-        //       sweep bitti, kernel32 wait stub'larina dokunmak guvenli.
-        //   (b) tick > 8 sec     -- statik patch yolu (unpacked binary),
-        //       val_hit hic gelmez; sabit zaman sonra yine de hook'larizi
-        //       kurariz. Cogu Themida cold start'inda val_hit 60-180 sn
-        //       icinde gelir, bu yuzden 8 sn'lik fallback Themida'yi
-        //       bozmaz.
-        if (!waitHooksInstalled &&
-            ((g_valHit && (nowTick - startTick) > 2000) ||
-             ((nowTick - startTick) > 8000))) {
-            Log(g_valHit ? "LATE InitWaitHooks (post-val branch)"
-                         : "LATE InitWaitHooks (timer branch -- statik patch yolu)");
-            InitWaitHooks();
-            waitHooksInstalled = TRUE;
-        }
+        // (Wait hooks are now initialized immediately at startup)
 
         // (1b) Once GG result hits, sweep-clear DRx again (critical: Themida
         //      anti-debug probe kills us in ~2 sec if any DR1/DR2 stay set)
@@ -444,13 +424,15 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
             }
         }
 
-        if (lstrcmpiA(selfBasename, "revival_wrapper.exe") == 0) {
-            // === WRAPPER MODE -- EARLY RETURN, hicbir patch/hook/armor ===
-            // Wrapper kendi mantigini calistirmali. patcher.dll burada hiç
-            // is yapmamali. Log dosyasi = patcher_wrapper.log.
+        if (lstrcmpiA(selfBasename, "revival_wrapper.exe") == 0 ||
+            lstrcmpiA(selfBasename, "GameGuard.des") == 0 ||
+            lstrcmpiA(selfBasename, "GameMon.des") == 0) {
+            // === WRAPPER/GAMEGUARD MODE -- EARLY RETURN, hicbir patch/hook/armor ===
+            // Wrapper veya hile korumasi kendi mantigini calistirmali. patcher.dll burada
+            // is yapmamali. Log dosyasi = patcher_ignored.log.
             char* slash = (char*)strrchr(g_logPath, '\\');
-            if (slash) lstrcpyA(slash + 1, "patcher_wrapper.log");
-            Log("DLL_PROCESS_ATTACH [WRAPPER MODE] -- EARLY RETURN, no patches");
+            if (slash) lstrcpyA(slash + 1, "patcher_ignored.log");
+            Log("DLL_PROCESS_ATTACH [IGNORED MODE] -- EARLY RETURN, no patches");
             return TRUE;  // hicbir armor, hook, VEH, ScyllaHide yok
         }
 
@@ -624,16 +606,14 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
                 if (hKernel) {
                     DWORD termVA = (DWORD)(ULONG_PTR)GetProcAddress(hKernel, "TerminateProcess");
                     DWORD exitVA = (DWORD)(ULONG_PTR)GetProcAddress(hKernel, "ExitProcess");
-                    PatchStdcallStub(termVA, 8, "[inline] kernel32!TerminateProcess");
-                    PatchStdcallStub(exitVA, 4, "[inline] kernel32!ExitProcess");
+                    PatchHangStub(termVA, "[inline] kernel32!TerminateProcess");
+                    PatchHangStub(exitVA, "[inline] kernel32!ExitProcess");
                 }
                 if (hNt) {
                     DWORD ntTermProc = (DWORD)(ULONG_PTR)GetProcAddress(hNt, "NtTerminateProcess");
                     DWORD rtlExit    = (DWORD)(ULONG_PTR)GetProcAddress(hNt, "RtlExitUserProcess");
-                    DWORD ntTermThr  = (DWORD)(ULONG_PTR)GetProcAddress(hNt, "NtTerminateThread");
-                    PatchStdcallStub(ntTermProc, 8, "[inline] ntdll!NtTerminateProcess");
-                    PatchStdcallStub(rtlExit,    4, "[inline] ntdll!RtlExitUserProcess");
-                    PatchStdcallStub(ntTermThr,  8, "[inline] ntdll!NtTerminateThread");
+                    PatchHangStub(ntTermProc, "[inline] ntdll!NtTerminateProcess");
+                    PatchHangStub(rtlExit, "[inline] ntdll!RtlExitUserProcess");
                 }
                 // Install VEH inline too -- HW BP needs it ready before the
                 // first DR0 hit. AddVectoredExceptionHandler is just a
