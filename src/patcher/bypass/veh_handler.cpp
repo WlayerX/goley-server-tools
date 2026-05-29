@@ -2,6 +2,72 @@
 #include "../core/logger.h"
 #include "../core/helpers.h"
 
+// ============================================================================
+// DumpCrashContext -- full register + stack-walk dump to patcher_crash.log.
+//
+// Pure logging, NEVER mutates the context. Called log-before-rescue from the
+// fatal-exception path in VehHandler so we capture exactly WHERE a silent
+// termination originates before the existing AV-rescue swallows or advances.
+//
+// Why a separate crash file: patcher.log floods with HWBP/wait traffic; the
+// crash dump must survive a silent exit, so we isolate it (LogCrash closes the
+// file handle per call = effectively flushed even if the process dies next).
+// ============================================================================
+static void DumpCrashContext(PEXCEPTION_POINTERS exc, const char* tag) {
+    PCONTEXT c = exc->ContextRecord;
+    PEXCEPTION_RECORD r = exc->ExceptionRecord;
+    char buf[512];
+
+    DWORD faultAddr = r->NumberParameters > 1 ? (DWORD)r->ExceptionInformation[1] : 0;
+    DWORD access    = r->NumberParameters > 0 ? (DWORD)r->ExceptionInformation[0] : 0;
+    const char* accessTxt = (access == 0) ? "read" : (access == 1) ? "write"
+                          : (access == 8) ? "DEP-execute" : "?";
+
+    char eipMod[64] = {0}; DWORD eipRva = 0;
+    ResolveAddrToModule((void*)c->Eip, eipMod, sizeof(eipMod), &eipRva);
+
+    wsprintfA(buf, "================ CRASH [%s] code=0x%08X ================", tag, r->ExceptionCode);
+    LogCrash(buf);
+    wsprintfA(buf, "  EIP=0x%08X (%s+0x%X / %s)  fault=0x%08X (%s)  flags=0x%X",
+              c->Eip, eipMod, eipRva, ClassifyEip(c->Eip), faultAddr, accessTxt,
+              r->ExceptionFlags);
+    LogCrash(buf);
+    wsprintfA(buf, "  EAX=0x%08X EBX=0x%08X ECX=0x%08X EDX=0x%08X",
+              c->Eax, c->Ebx, c->Ecx, c->Edx);
+    LogCrash(buf);
+    wsprintfA(buf, "  ESI=0x%08X EDI=0x%08X EBP=0x%08X ESP=0x%08X EFL=0x%08X",
+              c->Esi, c->Edi, c->Ebp, c->Esp, c->EFlags);
+    LogCrash(buf);
+    wsprintfA(buf, "  DR0=0x%08X DR1=0x%08X DR2=0x%08X DR3=0x%08X DR6=0x%08X DR7=0x%08X",
+              c->Dr0, c->Dr1, c->Dr2, c->Dr3, c->Dr6, c->Dr7);
+    LogCrash(buf);
+
+    // Stack walk: read 24 dwords from ESP; symbolicate code-like values so the
+    // caller chain is visible even without a debugger. Guarded read (the stack
+    // itself may be partially unmapped during a Themida teardown).
+    LogCrash("  --- stack walk (ESP+0x00 .. +0x5C) ---");
+    for (int i = 0; i < 24; i++) {
+        DWORD val = 0;
+        __try {
+            val = *(volatile DWORD*)(ULONG_PTR)(c->Esp + i * 4);
+        } __except (EXCEPTION_EXECUTE_HANDLER) {
+            wsprintfA(buf, "  stk[+0x%02X] <unreadable>", i * 4);
+            LogCrash(buf);
+            break;
+        }
+        // Only symbolicate values that look like code addresses (inside a module).
+        char m[64] = {0}; DWORD rva = 0;
+        ResolveAddrToModule((void*)val, m, sizeof(m), &rva);
+        if (lstrcmpA(m, "<anon>") != 0) {
+            wsprintfA(buf, "  stk[+0x%02X]=0x%08X  %s+0x%X (%s)",
+                      i * 4, val, m, rva, ClassifyEip(val));
+            LogCrash(buf);
+        }
+    }
+    LogCrash("================ END CRASH ================");
+}
+
+
 LONG CALLBACK VehHandler(PEXCEPTION_POINTERS exc) {
     DWORD code = exc->ExceptionRecord->ExceptionCode;
     DWORD eip = exc->ContextRecord->Eip;
@@ -197,6 +263,34 @@ LONG CALLBACK VehHandler(PEXCEPTION_POINTERS exc) {
             Log(buf);
             return EXCEPTION_CONTINUE_EXECUTION;
         }
+        // ---- AGGRESSIVE CRASH DUMP (log-before-rescue) ----------------------
+        // Capture full context for genuinely fatal codes the moment they fire,
+        // BEFORE the AV-rescue below swallows/advances them. This is what tells
+        // us WHERE the silent termination originates. Capped so a Themida AV
+        // flood can't starve its own VEH chain via log volume.
+        //   0xC0000005 = ACCESS_VIOLATION
+        //   0xC00000FD = STACK_OVERFLOW
+        //   0xC0000409 = FAST_FAIL (__fastfail / stack cookie / GS)
+        //   0xC000001D = ILLEGAL_INSTRUCTION (first occurrence only)
+        {
+            static volatile LONG g_crashDumps = 0;
+            BOOL fatal = (code == EXCEPTION_ACCESS_VIOLATION ||
+                          code == EXCEPTION_STACK_OVERFLOW   ||
+                          code == 0xC0000409 /* FAST_FAIL */  ||
+                          code == 0xC000001D /* ILLEGAL_INSTRUCTION */);
+            if (fatal) {
+                LONG d = InterlockedIncrement(&g_crashDumps);
+                if (d <= 12) {
+                    const char* nm = (code == EXCEPTION_ACCESS_VIOLATION) ? "ACCESS_VIOLATION"
+                                   : (code == EXCEPTION_STACK_OVERFLOW)   ? "STACK_OVERFLOW"
+                                   : (code == 0xC0000409)                 ? "FAST_FAIL"
+                                   : "ILLEGAL_INSTRUCTION";
+                    DumpCrashContext(exc, nm);
+                    if (d == 12) LogCrash("(crash-dump cap reached -- further fatal exceptions silent)");
+                }
+            }
+        }
+
         // STATUS_ILLEGAL_INSTRUCTION (0xC000001D) Themida'nin tamper-detection
         // flood'u. Log spam'i CPU yer. Sadece ilk 5'i logla, gerisi sessiz.
         static volatile LONG g_illegalCount = 0;

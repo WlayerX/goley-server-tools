@@ -9,6 +9,8 @@
 #include "../hooks/hook_window.h"
 #include "../hooks/hook_bugtrap.h"
 #include "../hooks/hook_netmarble.h"
+#include "../hooks/hook_exit.h"
+#include "../hooks/hook_ipc.h"
 #include "../bypass/hwbp.h"
 #include "../bypass/veh_handler.h"
 #include "../bypass/anticheat.h"
@@ -102,6 +104,19 @@ DWORD WINAPI PatchThread(LPVOID lpParam) {
     // child spawn (typically nProtect's GameMon.des) gets our DLL APC-injected.
     InitCreateProcessHooks();
 
+    // ntdll-level exit interception via MinHook (NtTerminateProcess /
+    // RtlExitUserProcess). Installed EARLY and BEFORE we PatchHangStub these
+    // stubs anywhere -- MinHook must see clean prologues to trampoline. These
+    // log the full caller stack to patcher_crash.log so we can finally see the
+    // call site of the silent termination. Falls back to PatchHangStub per-stub
+    // if trampolining the short syscall stub fails.
+    {
+        int ne = InitExitHooks();
+        char eb[96];
+        wsprintfA(eb, "Exit-API interception installed: %d ntdll stub(s) via MinHook", ne);
+        Log(eb);
+    }
+
     // Wait hooks ENABLED IMMEDIATELY so we catch the early nProtect wait.
     // GameGuard might detect this and try to kill the process, but our inline
     // PatchHangStub (DllMain) will just freeze that anti-debug thread.
@@ -175,10 +190,10 @@ DWORD WINAPI PatchThread(LPVOID lpParam) {
     //   NtTerminateThread (HANDLE, NTSTATUS) -- 2 args -> ret 8  (defensive)
     HMODULE hNt = GetModuleHandleA("ntdll.dll");
     if (hNt) {
-        DWORD ntTermProc = (DWORD)(ULONG_PTR)GetProcAddress(hNt, "NtTerminateProcess");
-        DWORD rtlExit    = (DWORD)(ULONG_PTR)GetProcAddress(hNt, "RtlExitUserProcess");
-        PatchHangStub(ntTermProc, "ntdll!NtTerminateProcess");
-        PatchHangStub(rtlExit, "ntdll!RtlExitUserProcess");
+        // NOTE: NtTerminateProcess / RtlExitUserProcess are intercepted by
+        // InitExitHooks() above (MinHook logging hooks, with PatchHangStub
+        // fallback). Do NOT PatchHangStub them here -- that would corrupt the
+        // prologue MinHook needs and silence the call-site capture.
         // ntdll!NtCreateUserProcess is the REAL syscall that creates a process
         // on modern Windows. kernel32!CreateProcessA/W and internal variants
         // all funnel through it. Goley_'s Themida bypass goes straight here.
@@ -255,6 +270,14 @@ DWORD WINAPI PatchThread(LPVOID lpParam) {
             bugTrapHooksInstalled = TRUE;
             Log("BugTrap hooks installed (A+B+C dialog bypass)");
         }
+        // IPC/heartbeat observer hooks -- detect GameGuard shared-memory or
+        // driver (DeviceIoControl) handshake the sleeping dummy_gg.exe fails.
+        // Pure pass-through logging, evidence-only.
+        static BOOL ipcHooksInstalled = FALSE;
+        if (!ipcHooksInstalled && InitIpcHooks()) {
+            ipcHooksInstalled = TRUE;
+            Log("IPC observer hooks installed (CreateFileMapping/MapViewOfFile/DeviceIoControl)");
+        }
 
         // (1) Once val hits, sweep-clear DRx (Themida anti-debug friendliness)
         if (g_valHit && !valSweepDone) {
@@ -271,6 +294,18 @@ DWORD WINAPI PatchThread(LPVOID lpParam) {
         //      well-known wait stubs. The return address read from [ESP+0]
         //      tells us which Goley_ code site is parked on a wait.
         DWORD nowTick = GetTickCount();
+
+        // 1 Hz heartbeat -- when the process dies silently, the LAST heartbeat
+        // line in patcher.log bounds the death window (and confirms the patch
+        // thread itself was still alive right before the exit).
+        static DWORD g_lastHeartbeat = 0;
+        if ((nowTick - g_lastHeartbeat) > 1000) {
+            g_lastHeartbeat = nowTick;
+            wsprintfA(buf, "HB iter=%d valHit=%d ggrHit=%d mbwHit=%d cpHit=%d tick=%lu",
+                      iterations, g_valHit, g_ggrHit, g_mbwHit, g_cpHit, nowTick);
+            Log(buf);
+        }
+
         if ((nowTick - startTick) > 10000 &&
             (nowTick - g_lastThreadDumpTick) > 15000) {
             g_lastThreadDumpTick = nowTick;
@@ -609,12 +644,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
                     PatchHangStub(termVA, "[inline] kernel32!TerminateProcess");
                     PatchHangStub(exitVA, "[inline] kernel32!ExitProcess");
                 }
-                if (hNt) {
-                    DWORD ntTermProc = (DWORD)(ULONG_PTR)GetProcAddress(hNt, "NtTerminateProcess");
-                    DWORD rtlExit    = (DWORD)(ULONG_PTR)GetProcAddress(hNt, "RtlExitUserProcess");
-                    PatchHangStub(ntTermProc, "[inline] ntdll!NtTerminateProcess");
-                    PatchHangStub(rtlExit, "[inline] ntdll!RtlExitUserProcess");
-                }
+                // ntdll!NtTerminateProcess / RtlExitUserProcess are deliberately
+                // LEFT CLEAN here -- PatchThread's InitExitHooks() MinHooks them
+                // for full caller-stack logging and needs an unmodified prologue.
+                // kernel32 exit stubs above still get the early EB-FE guard.
+                (void)hNt;
                 // Install VEH inline too -- HW BP needs it ready before the
                 // first DR0 hit. AddVectoredExceptionHandler is just a
                 // linked-list insertion, doesn't take loader lock.

@@ -48,6 +48,46 @@ void Log(const char* msg) {
 }
 
 
+void LogCrash(const char* msg) {
+    // Derive patcher_crash.log lazily from the (possibly mode-renamed) g_logPath
+    // exactly once. e.g. ...\patcher.log -> ...\patcher_crash.log
+    static char g_crashLogPath[MAX_PATH] = {0};
+    if (g_crashLogPath[0] == 0) {
+        if (g_logPath[0]) {
+            lstrcpynA(g_crashLogPath, g_logPath, MAX_PATH);
+            char* slash = (char*)strrchr(g_crashLogPath, '\\');
+            char* tgt = slash ? slash + 1 : g_crashLogPath;
+            lstrcpyA(tgt, "patcher_crash.log");
+        } else {
+            lstrcpyA(g_crashLogPath, "patcher_crash.log");
+        }
+    }
+
+    char timed[1100];
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+    int n = wsprintfA(timed, "[%02d:%02d:%02d.%03d P=%lu] %s\r\n",
+                      st.wHour, st.wMinute, st.wSecond, st.wMilliseconds,
+                      GetCurrentProcessId(), msg);
+
+    // Mirror to console too (matches Log() behavior).
+    if (g_conHandle != INVALID_HANDLE_VALUE) {
+        DWORD w;
+        WriteFile(g_conHandle, timed, n, &w, NULL);
+    }
+
+    HANDLE h = CreateFileA(g_crashLogPath,
+                           FILE_APPEND_DATA, FILE_SHARE_READ | FILE_SHARE_WRITE,
+                           NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (h != INVALID_HANDLE_VALUE) {
+        SetFilePointer(h, 0, NULL, FILE_END);
+        DWORD written;
+        WriteFile(h, timed, n, &written, NULL);
+        CloseHandle(h);  // close-per-call = effectively flushed on silent exit
+    }
+}
+
+
 void LogLoadedModulesSnapshot(const char* tag) {
     HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, GetCurrentProcessId());
     if (hSnap == INVALID_HANDLE_VALUE) {
