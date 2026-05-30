@@ -53,36 +53,40 @@ DWORD WINAPI HookedWaitForSingleObject(HANDLE hObj, DWORD dwTimeout) {
         // kullanabilir. Ilk 90 sn icinde 100ms poll ile dene, sonra
         // orijinal INFINITE'e birak.
         else if (dwTimeout == INFINITE && lstrcmpA(name, "<unnamed>") == 0) {
+            // UNBOUNDED timed-poll. The old code only polled the first 20 anon
+            // waits for 90s then surrendered to native INFINITE; the 21st+ fell
+            // straight through to g_origWFSO(INFINITE) and parked FOREVER at
+            // ntdll+0x7B03C (the observed deadlock). We never hand INFINITE to
+            // the native stub: poll at 250ms so the thread stays interruptible
+            // and wakes the instant the object signals.
             static volatile LONG g_anonWaitCount = 0;
             LONG anonIdx = InterlockedIncrement(&g_anonWaitCount);
-            if (anonIdx <= 20) {
-                wsprintfA(buf, "  anon-INFINITE wait #%ld -- polling 100ms x 900", anonIdx);
+            BOOL logThis = (anonIdx <= 20);
+            if (logThis) {
+                wsprintfA(buf, "  anon-INFINITE wait #%ld -- 250ms timed-poll (never native INFINITE)", anonIdx);
                 Log(buf);
-                LeaveHook();
-                // 90 sn boyunca 100ms aralikla poll
-                for (int attempt = 0; attempt < 900; attempt++) {
-                    DWORD r = g_origWFSO(hObj, 100);
-                    if (r == WAIT_OBJECT_0) {
-                        if (EnterHook()) {
-                            wsprintfA(buf, "  anon wait #%ld signaled after %d ms",
-                                      anonIdx, (attempt + 1) * 100);
-                            Log(buf);
-                            LeaveHook();
-                        }
-                        return r;
+            }
+            LeaveHook();
+            DWORD waited = 0;
+            for (;;) {
+                DWORD r = g_origWFSO(hObj, 250);
+                if (r != WAIT_TIMEOUT) {
+                    if (logThis && EnterHook()) {
+                        wsprintfA(buf, "  anon wait #%ld signaled (r=%lu) after ~%lu ms",
+                                  anonIdx, r, waited);
+                        Log(buf);
+                        LeaveHook();
                     }
+                    return r;
                 }
-                // 90 sn doldu, orijinal INFINITE'e birak
-                if (EnterHook()) {
-                    wsprintfA(buf, "  anon wait #%ld: 90s poll exhausted, trying SetEvent",
-                              anonIdx);
+                waited += 250;
+                // ~30s heartbeat so a genuinely stuck wait is visible, not silent.
+                if ((waited % 30000) == 0 && EnterHook()) {
+                    wsprintfA(buf, "  anon wait #%ld still blocked after %lu ms (poll continues)",
+                              anonIdx, waited);
                     Log(buf);
-                    // Son care: event'i kendimiz signal edelim
-                    SetEvent(hObj);
                     LeaveHook();
                 }
-                DWORD r = g_origWFSO(hObj, 2000);
-                return r;
             }
         }
         LeaveHook();
@@ -143,6 +147,39 @@ DWORD WINAPI HookedWaitForSingleObjectEx(HANDLE hObj, DWORD dwTimeout,
             Log(buf2);
             SetEvent(hObj);
             InterlockedExchange(&ggBypassedEx, 1);
+        }
+        // Mirror the WFSO anon-INFINITE guard: never let an anonymous INFINITE
+        // wait park forever at the native stub (ntdll+0x7B03C). 250ms timed-poll
+        // keeps the thread interruptible; honors bAlertable on each slice.
+        else if (dwTimeout == INFINITE && lstrcmpA(name, "<unnamed>") == 0) {
+            static volatile LONG g_anonWaitCountEx = 0;
+            LONG anonIdx = InterlockedIncrement(&g_anonWaitCountEx);
+            BOOL logThis = (anonIdx <= 20);
+            if (logThis) {
+                wsprintfA(buf, "  anon-INFINITE wait (Ex) #%ld -- 250ms timed-poll (never native INFINITE)", anonIdx);
+                Log(buf);
+            }
+            LeaveHook();
+            DWORD waited = 0;
+            for (;;) {
+                DWORD r = g_origWFSOEx(hObj, 250, bAlertable);
+                if (r != WAIT_TIMEOUT) {
+                    if (logThis && EnterHook()) {
+                        wsprintfA(buf, "  anon wait (Ex) #%ld signaled (r=%lu) after ~%lu ms",
+                                  anonIdx, r, waited);
+                        Log(buf);
+                        LeaveHook();
+                    }
+                    return r;
+                }
+                waited += 250;
+                if ((waited % 30000) == 0 && EnterHook()) {
+                    wsprintfA(buf, "  anon wait (Ex) #%ld still blocked after %lu ms (poll continues)",
+                              anonIdx, waited);
+                    Log(buf);
+                    LeaveHook();
+                }
+            }
         }
         LeaveHook();
     }
