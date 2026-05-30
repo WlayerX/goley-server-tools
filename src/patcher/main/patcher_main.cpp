@@ -580,6 +580,14 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
         // STUB MODE (Goley_.exe) icin asagidaki blok TAM AKTIF.
         // ====================================================================
         if (!IS_OBSERVER_MODE()) {
+            // Set image base EARLY -- before the inline VEH install at the end of
+            // this block AND before Themida's first voluntary AV/ILL probes (which
+            // fire ~before PatchThread's later assignment at :135). Without this,
+            // VehHandler's in-game-image rescue predicate saw g_imageBase==NULL and
+            // skipped the swallow -> Themida ExitProcess -> hang at "초기화중".
+            // Module is mapped pre-DllMain, so this is safe under loader lock.
+            g_imageBase = (BYTE*)GetModuleHandleA(NULL);
+
             // ScyllaHide HookLibrary'i HEMEN yukle. Onceki seans dataya gore
             // DllMain'de yuklendiginde Themida tamper detection tetiklenmiyor
             // (90+ sn 0 exception). PatchThread'den gec yukleninde flood var.

@@ -3,6 +3,58 @@
 #include "../core/helpers.h"
 
 // ============================================================================
+// EipInMainImage -- race-free "is EIP inside the main game module" predicate.
+//
+// The AV/ILL rescue formerly read g_imageBase, but that global is set ~700ms
+// into startup by PatchThread, AFTER Themida's earliest voluntary AV/ILL probes
+// fire (logs: crash @ .148/.170, g_imageBase set @ .85s). Result: inGameImage
+// was false, the probes fell through to Themida -> RtlExitUserProcess -> hang.
+//
+// Resolve the main module's base + SizeOfImage ONCE here, independent of any
+// async-set global, via GetModuleHandleA(NULL) (the module is mapped before
+// DllMain, so this is valid from the very first VEH entry). SizeOfImage is read
+// straight from the PE optional header at the image base (a static link-time
+// field the loader maps before DllMain), guarded; falls back to 0x02000000.
+// ============================================================================
+static BOOL EipInMainImage(DWORD eip) {
+    static volatile LONG s_init = 0;
+    static DWORD s_base = 0;
+    static DWORD s_size = 0;
+
+    if (!s_base) {
+        DWORD base = (DWORD)(ULONG_PTR)GetModuleHandleA(NULL);
+        DWORD size = 0x02000000;  // fallback if PE parse fails
+        if (base) {
+            __try {
+                PIMAGE_DOS_HEADER dos = (PIMAGE_DOS_HEADER)(ULONG_PTR)base;
+                if (dos->e_magic == IMAGE_DOS_SIGNATURE) {
+                    PIMAGE_NT_HEADERS nt =
+                        (PIMAGE_NT_HEADERS)(ULONG_PTR)(base + dos->e_lfanew);
+                    if (nt->Signature == IMAGE_NT_SIGNATURE &&
+                        nt->OptionalHeader.SizeOfImage)
+                        size = nt->OptionalHeader.SizeOfImage;
+                }
+            } __except (EXCEPTION_EXECUTE_HANDLER) {
+                size = 0x02000000;
+            }
+        }
+        // Cache (idempotent under concurrent VEH entry -- identical values).
+        // Publish s_size BEFORE s_base so the `!s_base` gate never pairs a fresh
+        // base with a stale size==0. One-time confirmation log.
+        s_size = size;
+        s_base = base;
+        if (base && InterlockedExchange(&s_init, 1) == 0) {
+            char b[160];
+            wsprintfA(b, "[veh] main image base=0x%08X size=0x%08X (rescue predicate)",
+                      base, size);
+            Log(b);
+        }
+    }
+
+    return s_base && eip >= s_base && eip < s_base + s_size;
+}
+
+// ============================================================================
 // DumpCrashContext -- full register + stack-walk dump to patcher_crash.log.
 //
 // Pure logging, NEVER mutates the context. Called log-before-rescue from the
@@ -481,8 +533,7 @@ LONG CALLBACK VehHandler(PEXCEPTION_POINTERS exc) {
         //    previously left to its handler -> "초기화중" deadlock. We swallow
         //    them by advancing EIP. faultAddr-benign cases already filtered above.
         if (code == EXCEPTION_ACCESS_VIOLATION) {
-            DWORD imgBase = (DWORD)(ULONG_PTR)g_imageBase;
-            BOOL inGameImage = (imgBase && eip >= imgBase && eip < imgBase + 0x02000000);
+            BOOL inGameImage = EipInMainImage(eip);
             BOOL shouldRescue = (eip >= 0x70000000 || eip == 0 || eip == 0xFFFFFFFF || inGameImage);
             if (shouldRescue && RescueAdvanceEip(exc, eip, "AV"))
                 return EXCEPTION_CONTINUE_EXECUTION;
@@ -494,8 +545,7 @@ LONG CALLBACK VehHandler(PEXCEPTION_POINTERS exc) {
         //    via its fallback so EIP advances past the illegal opcode instead of
         //    re-faulting forever. (illegal-instr EIP is never 0, so no null case.)
         if (code == EXCEPTION_ILLEGAL_INSTRUCTION /* 0xC000001D */) {
-            DWORD imgBase = (DWORD)(ULONG_PTR)g_imageBase;
-            BOOL inGameImage = (imgBase && eip >= imgBase && eip < imgBase + 0x02000000);
+            BOOL inGameImage = EipInMainImage(eip);
             BOOL shouldRescue = (eip >= 0x70000000 || inGameImage);
             if (shouldRescue && RescueAdvanceEip(exc, eip, "ILL"))
                 return EXCEPTION_CONTINUE_EXECUTION;
