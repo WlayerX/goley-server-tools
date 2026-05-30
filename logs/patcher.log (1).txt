@@ -1,0 +1,32 @@
+[21:36:53.848 P=17668] DLL_PROCESS_ATTACH [STUB MODE]  (Goley_.exe Themida chain loader)
+[21:36:53.850 P=17668] full armor (VEH+HWBP+DialogKiller+BugTrap+ScyllaHide+inline patches+fake cmdline)
+[21:36:53.850 P=17668] self-exec detection log-only -- expect to spawn BinaryTr.bin PAYLOAD
+[21:36:53.851 P=17668] ScyllaHide load FAILED: 126
+[21:36:53.852 P=17668] Patched [inline] user32!MessageBoxA -> mov eax,1; ret 16
+[21:36:53.854 P=17668] Patched [inline] user32!MessageBoxW -> mov eax,1; ret 16
+[21:36:53.854 P=17668] Patched [inline] user32!MessageBoxExA -> mov eax,1; ret 20
+[21:36:53.854 P=17668] Patched [inline] user32!MessageBoxExW -> mov eax,1; ret 20
+[21:36:53.855 P=17668] Patched [inline] user32!MessageBoxIndirectA -> mov eax,1; ret 4
+[21:36:53.855 P=17668] Patched [inline] user32!MessageBoxIndirectW -> mov eax,1; ret 4
+[21:36:53.856 P=17668] Patched [inline] user32!DialogBoxParamA -> mov eax,1; ret 20
+[21:36:53.856 P=17668] Patched [inline] user32!DialogBoxParamW -> mov eax,1; ret 20
+[21:36:53.857 P=17668] Patched [inline] user32!DialogBoxIndirectParamA -> mov eax,1; ret 20
+[21:36:53.858 P=17668] Patched [inline] user32!DialogBoxIndirectParamW -> mov eax,1; ret 20
+[21:36:53.858 P=17668] Patched [inline] kernel32!GetCommandLineA -> mov eax,fake; ret
+[21:36:53.858 P=17668] Patched [inline] kernel32!GetCommandLineW -> mov eax,fake; ret
+[21:36:53.859 P=17668] Patched [inline] kernel32!TerminateProcess @ 0x751E2E00  orig=8BFF -> EB FE (hang loop)
+[21:36:53.860 P=17668] Patched [inline] kernel32!ExitProcess @ 0x751DB030  orig=558B -> EB FE (hang loop)
+[21:36:53.860 P=17668] [inline] VEH installed
+[21:36:53.861 P=17668] PatchThread starting (VEH+HWBP+MinHook refresh-loop mode)
+[21:36:53.861 P=17668] InitDirectSyscalls: SSN(NtQueryInformationProcess)=0x19 gadget@0x019A0000 tail@0x77AB9345 wow64=1
+[21:36:53.863 P=17668] Hook targets: CreateProcessA=0x751E0460 CreateProcessW=0x751CD520
+[21:36:53.986 P=17668] MinHook: CreateProcessA/W and NtQueryInformationProcess hooks ACTIVE
+[21:36:54.022 P=17668] InitExitHooks: NtTerminateProcess hooked via MinHook at 0x77AB9490
+[21:36:54.064 P=17668] InitExitHooks: RtlExitUserProcess hooked via MinHook at 0x77A74090
+[21:36:54.064 P=17668] Exit-API interception installed: 2 ntdll stub(s) via MinHook
+[21:36:54.064 P=17668] Wait hooks ENABLED immediately
+[21:36:54.102 P=17668] INTERESTING EXC: code=0xC000001D EIP=0x17FD394 flags=0x0 p0=0x0 p1=0x0
+[21:36:54.102 P=17668] [veh] main image base=0x00400000 size=0x01598000 (rescue predicate)
+[21:36:54.102 P=17668] [rescue-ILL] EIP 0x17FD394 -> 0x17FD396 adv=2 (FORCED len=2 flags=0x3000) rep=0 tot=1
+[21:36:54.110 P=17668] INTERESTING EXC: code=0xC0000005 EIP=0x17FD396 flags=0x0 p0=0x0 p1=0xFFFFFFFF
+[21:36:54.110 P=17668] [rescue-AV] EIP 0x17FD396 -> 0x17FD397 adv=1 (clean len=1 flags=0x0) rep=0 tot=2
