@@ -68,6 +68,119 @@ static void DumpCrashContext(PEXCEPTION_POINTERS exc, const char* tag) {
 }
 
 
+// Livelock guard caps for RescueAdvanceEip (tunable). Global = total swallows
+// before we permanently hand back to Themida's VEH; Repeat = consecutive
+// swallows at the SAME EIP before we hand that one address back (Themida
+// looping a region). Sized generously for heavy voluntary-AV Themida configs.
+#define GOLEY_RESCUE_TOTAL_CAP   100000
+#define GOLEY_RESCUE_REPEAT_CAP  256
+
+// ============================================================================
+// RescueAdvanceEip -- the Katman-5 "voluntary AV / illegal-instruction" swallow.
+//
+// Themida deliberately throws 0xC0000005 / 0xC000001D INSIDE the game module
+// (Goley_.exe) as anti-debug "is a debugger swallowing this?" probes. We must
+// ADVANCE EIP past the faulting/illegal instruction (naive continue without
+// advancing re-fires the same address -> 50k exceptions/3s livelock). Uses
+// HDE32 for length; on UD2/F_ERROR it still advances (sane HDE len, else a
+// 2-byte fallback) so EIP is never left parked on the bad instruction.
+//
+// Returns TRUE if it mutated the CONTEXT for forward progress (caller returns
+// EXCEPTION_CONTINUE_EXECUTION). Returns FALSE -> caller falls through to
+// EXCEPTION_CONTINUE_SEARCH (= safe pre-fix behavior; a livelock can never
+// re-form because the guards below cap it). Only mutates EIP/ESP -- no .text
+// write, so Themida integrity checks stay happy.
+// ============================================================================
+static BOOL RescueAdvanceEip(PEXCEPTION_POINTERS exc, DWORD eip, const char* tag) {
+    // (A) Global hard cap -- a runaway permanently surrenders to Themida's VEH.
+    static volatile LONG g_rescueTotal = 0;
+    LONG total = InterlockedIncrement(&g_rescueTotal);
+    if (total > GOLEY_RESCUE_TOTAL_CAP) {
+        static volatile LONG warned = 0;
+        if (InterlockedIncrement(&warned) == 1)
+            Log("[rescue] total swallow cap reached -> handing back to Themida VEH");
+        return FALSE;
+    }
+
+    // (B) Same-EIP repeat guard. Normal advance always changes EIP, so a healthy
+    // stream never trips this; only a Themida region-loop on one address does.
+    static volatile LONG g_lastEip     = 0;
+    static volatile LONG g_repeatCount = 0;
+    LONG prev = InterlockedExchange(&g_lastEip, (LONG)eip);
+    LONG rep;
+    if ((DWORD)prev == eip) rep = InterlockedIncrement(&g_repeatCount);
+    else { InterlockedExchange(&g_repeatCount, 0); rep = 0; }
+    if (rep > GOLEY_RESCUE_REPEAT_CAP) {
+        static volatile LONG rWarned = 0;
+        if (InterlockedIncrement(&rWarned) <= 5) {
+            char b[160];
+            wsprintfA(b, "[rescue-%s] same EIP=0x%X swallowed %ld x -> CONTINUE_SEARCH", tag, eip, rep);
+            Log(b);
+        }
+        return FALSE;
+    }
+
+    // (C) Invalid EIP (0 / -1 / near-null): simulate a RET to recover.
+    if (eip < 0x1000 || eip > 0xFFFFFFF0) {
+        DWORD* esp = (DWORD*)exc->ContextRecord->Esp;
+        __try {
+            DWORD retAddr = esp[0];
+            exc->ContextRecord->Eip  = retAddr;
+            exc->ContextRecord->Esp += 4;
+            static volatile LONG c = 0;
+            if (InterlockedIncrement(&c) <= 50) {
+                char b[160];
+                wsprintfA(b, "[rescue-%s] invalid EIP 0x%X -> simulated RET to 0x%X", tag, eip, retAddr);
+                Log(b);
+            }
+            return TRUE;
+        } __except (EXCEPTION_EXECUTE_HANDLER) {
+            static volatile LONG f = 0;
+            if (InterlockedIncrement(&f) <= 20)
+                Log("[rescue] invalid EIP + unreadable stack -> CONTINUE_SEARCH");
+            return FALSE;
+        }
+    }
+
+    // (D) Valid EIP -- HDE32 length advance with F_ERROR/UD2 fallback.
+    unsigned int instLen = 0, flags = 0;
+    __try {
+        hde32s hs;
+        instLen = hde32_disasm((const void*)eip, &hs);
+        flags   = hs.flags;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        static volatile LONG e = 0;
+        if (InterlockedIncrement(&e) <= 20) {
+            char b[160];
+            wsprintfA(b, "[rescue-%s] disasm faulted @0x%X -> CONTINUE_SEARCH", tag, eip);
+            Log(b);
+        }
+        return FALSE;
+    }
+
+    // Pick an advance that ALWAYS makes progress:
+    //   clean decode (1..15, no F_ERROR)      -> instLen
+    //   F_ERROR but HDE reports sane len 1..15 -> trust it
+    //   else (len 0 / >15, e.g. UD2 = 0F 0B)   -> 2-byte fallback
+    BOOL clean = (instLen >= 1 && instLen <= 15 && !(flags & F_ERROR));
+    unsigned int adv = (instLen >= 1 && instLen <= 15) ? instLen : 2;
+
+    exc->ContextRecord->Eip = eip + adv;
+
+    static volatile LONG sw = 0;
+    LONG n = InterlockedIncrement(&sw);
+    if (n <= 100) {
+        char b[256];
+        wsprintfA(b, "[rescue-%s] EIP 0x%X -> 0x%X adv=%u (%s len=%u flags=0x%X) rep=%ld tot=%ld",
+                  tag, eip, eip + adv, adv, clean ? "clean" : "FORCED",
+                  instLen, flags, rep, total);
+        Log(b);
+        if (n == 100) Log("[rescue] swallow-log cap reached (further swallows silent)");
+    }
+    return TRUE;
+}
+
+
 LONG CALLBACK VehHandler(PEXCEPTION_POINTERS exc) {
     DWORD code = exc->ExceptionRecord->ExceptionCode;
     DWORD eip = exc->ContextRecord->Eip;
@@ -363,76 +476,30 @@ LONG CALLBACK VehHandler(PEXCEPTION_POINTERS exc) {
             Log(buf);
         }
 
+        // -- ACCESS_VIOLATION rescue. Now ALSO covers the game's own module
+        //    (Katman 5): Themida's voluntary AVs at eip < 0x70000000 were
+        //    previously left to its handler -> "초기화중" deadlock. We swallow
+        //    them by advancing EIP. faultAddr-benign cases already filtered above.
         if (code == EXCEPTION_ACCESS_VIOLATION) {
-    // Only rescue/swallow if the crash
-    // is in system DLLs (>= 0x70000000 in 32-bit ASLR)
-    // or completely invalid (EIP = 0 or
-    // 0xFFFFFFFF). This lets Themida's own
-    // voluntary AV exceptions flow to
-    // its own handlers so it doesn't detect tampering.
-    BOOL shouldRescue = (eip >= 0x70000000 || eip == 0 || eip == 0xFFFFFFFF);
-    if (shouldRescue) {
-        if (eip < 0x1000 || eip > 0xFFFFFFF0) {
-            // Stack restoration (simulate RET)
-            DWORD* esp = (DWORD*)exc->ContextRecord->Esp;
-            __try {
-                DWORD retAddr = esp[0];
-                exc->ContextRecord->Eip = retAddr;
-                exc->ContextRecord->Esp += 4;
-
-                static int avStackCount = 0;
-                if (avStackCount < 50) {
-                    avStackCount++;
-                    char buf[160];
-                    wsprintfA(buf, "AV-rescue (invalid EIP 0x%X): simulated RET to 0x%X", eip, retAddr);
-                    Log(buf);
-                    return EXCEPTION_CONTINUE_EXECUTION;
-                } else {
-                    return EXCEPTION_CONTINUE_SEARCH;
-                }
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER) {
-                Log("AV-rescue FAILED: invalid EIP and unreadable stack");
-            }
-        } else {
-            // Instruction length advance via HDE32
-            hde32s hs;
-            __try {
-                unsigned int instLen = hde32_disasm((const void*)eip, &hs);
-                if (instLen > 0 && instLen <= 15 && !(hs.flags & F_ERROR)) {
-                    exc->ContextRecord->Eip = eip + instLen;
-                    
-                    static int avSwallowCount = 0;
-                    if (avSwallowCount < 100) {
-                        avSwallowCount++;
-                        char buf[256];
-                        wsprintfA(buf, "AV-rescue @ EIP=0x%X (fault=0x%X, write=%d) -> advanced EIP by %u to 0x%X", 
-                                  eip, faultAddr, (exc->ExceptionRecord->ExceptionInformation[0] == 1), instLen, eip + instLen);
-                        Log(buf);
-                    }
-                    return EXCEPTION_CONTINUE_EXECUTION;
-                } else {
-                    static int avErrCount = 0;
-                    if (avErrCount < 20) {
-                        avErrCount++;
-                        char buf[160];
-                        wsprintfA(buf, "AV-rescue FAILED: HDE32 parsing error (len=%u, flags=0x%X)", instLen, hs.flags);
-                        Log(buf);
-                    }
-                }
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER) {
-                static int avExCount = 0;
-                if (avExCount < 20) {
-                    avExCount++;
-                    char buf[160];
-                    wsprintfA(buf, "AV-rescue FAILED: Exception while disassembling at 0x%X", eip);
-                    Log(buf);
-                }
-            }
+            DWORD imgBase = (DWORD)(ULONG_PTR)g_imageBase;
+            BOOL inGameImage = (imgBase && eip >= imgBase && eip < imgBase + 0x02000000);
+            BOOL shouldRescue = (eip >= 0x70000000 || eip == 0 || eip == 0xFFFFFFFF || inGameImage);
+            if (shouldRescue && RescueAdvanceEip(exc, eip, "AV"))
+                return EXCEPTION_CONTINUE_EXECUTION;
         }
-    }
-}
+
+        // -- ILLEGAL_INSTRUCTION (0xC000001D) rescue. This path did NOT exist
+        //    before -- 0xC000001D only logged then fell through to Themida.
+        //    UD2 (0F 0B) makes HDE32 set F_ERROR; RescueAdvanceEip handles that
+        //    via its fallback so EIP advances past the illegal opcode instead of
+        //    re-faulting forever. (illegal-instr EIP is never 0, so no null case.)
+        if (code == EXCEPTION_ILLEGAL_INSTRUCTION /* 0xC000001D */) {
+            DWORD imgBase = (DWORD)(ULONG_PTR)g_imageBase;
+            BOOL inGameImage = (imgBase && eip >= imgBase && eip < imgBase + 0x02000000);
+            BOOL shouldRescue = (eip >= 0x70000000 || inGameImage);
+            if (shouldRescue && RescueAdvanceEip(exc, eip, "ILL"))
+                return EXCEPTION_CONTINUE_EXECUTION;
+        }
     }
     return EXCEPTION_CONTINUE_SEARCH;
 }
