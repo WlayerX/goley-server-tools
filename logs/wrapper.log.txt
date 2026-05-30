@@ -1,0 +1,24 @@
+[15:33:02.897] ===== wrapper.exe started, argc=1 =====
+[15:33:02.898]   raw GetCommandLineW() = "C:\Users\semir\OneDrive\Desktop\goley-server-tools-feat-bypass-diagnostics\src\wrapper\revival_wrapper.exe"
+[15:33:02.898]   argv[0] = C:\Users\semir\OneDrive\Desktop\goley-server-tools-feat-bypass-diagnostics\src\wrapper\revival_wrapper.exe
+[15:33:02.899]   cwd = C:\Users\semir\OneDrive\Desktop\goley-server-tools-feat-bypass-diagnostics
+[15:33:02.907] GLY_NO_WRAPPER inherited -- spawn with DEBUG_PROCESS (IFEO bypass)
+[15:33:02.907] FATAL: argv[0]=wrapper.exe ama argv[1] yok -- recursion limiti
+[15:33:28.451] ===== wrapper.exe started, argc=2 =====
+[15:33:28.451]   raw GetCommandLineW() = "C:\Users\semir\OneDrive\Desktop\goley-server-tools-feat-bypass-diagnostics\src\wrapper\revival_wrapper.exe" "C:\Joygame\Goley\BinaryTr\Goley_.exe"
+[15:33:28.452]   argv[0] = C:\Users\semir\OneDrive\Desktop\goley-server-tools-feat-bypass-diagnostics\src\wrapper\revival_wrapper.exe
+[15:33:28.452]   argv[1] = C:\Joygame\Goley\BinaryTr\Goley_.exe
+[15:33:28.452]   cwd = C:\Joygame\Goley\BinaryTr
+[15:33:28.454] GLY_NO_WRAPPER inherited -- spawn with DEBUG_PROCESS (IFEO bypass)
+[15:33:28.454]   detected: argv[0]=wrapper.exe (self-spawn shape), exePath=argv[1]=C:\Joygame\Goley\BinaryTr\Goley_.exe
+[15:33:28.454] Spawning: exe='C:\Joygame\Goley\BinaryTr\Goley_.exe' creationFlags=0x5
+[15:33:28.455] Cmdline:  "C:\Joygame\Goley\BinaryTr\Goley_.exe"
+[15:33:28.464] DebugActiveProcessStop (early detach) returned 1
+[15:33:28.464] CreateProcess OK PID=26556 (suspended)
+[15:33:28.465] InjectDll: remote LoadLibraryW thread launched, waiting...
+[15:33:29.903] InjectDll: LoadLibraryW returned 0x74D30000 (HMODULE)
+[15:33:30.109] InjectDll: VerifyModuleLoaded(revival_patcher.dll) = LOADED OK
+[15:33:30.110] InjectDll returned OK
+[15:33:30.110] DebugActiveProcessStop returned 0 (detached debugger)
+[15:33:30.111] ResumeThread returned 1 (prev suspend count)
+[15:35:22.115] Child exited with code 3221225786

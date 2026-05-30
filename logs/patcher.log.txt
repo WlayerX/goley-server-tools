@@ -1,0 +1,778 @@
+[15:33:29.870 P=26556] DLL_PROCESS_ATTACH [STUB MODE]  (Goley_.exe Themida chain loader)
+[15:33:29.871 P=26556] full armor (VEH+HWBP+DialogKiller+BugTrap+ScyllaHide+inline patches+fake cmdline)
+[15:33:29.872 P=26556] self-exec detection log-only -- expect to spawn BinaryTr.bin PAYLOAD
+[15:33:29.873 P=26556] ScyllaHide load FAILED: 126
+[15:33:29.874 P=26556] Patched [inline] user32!MessageBoxA -> mov eax,1; ret 16
+[15:33:29.886 P=26556] Patched [inline] user32!MessageBoxW -> mov eax,1; ret 16
+[15:33:29.887 P=26556] Patched [inline] user32!MessageBoxExA -> mov eax,1; ret 20
+[15:33:29.888 P=26556] Patched [inline] user32!MessageBoxExW -> mov eax,1; ret 20
+[15:33:29.888 P=26556] Patched [inline] user32!MessageBoxIndirectA -> mov eax,1; ret 4
+[15:33:29.889 P=26556] Patched [inline] user32!MessageBoxIndirectW -> mov eax,1; ret 4
+[15:33:29.896 P=26556] Patched [inline] user32!DialogBoxParamA -> mov eax,1; ret 20
+[15:33:29.896 P=26556] Patched [inline] user32!DialogBoxParamW -> mov eax,1; ret 20
+[15:33:29.897 P=26556] Patched [inline] user32!DialogBoxIndirectParamA -> mov eax,1; ret 20
+[15:33:29.897 P=26556] Patched [inline] user32!DialogBoxIndirectParamW -> mov eax,1; ret 20
+[15:33:29.899 P=26556] Patched [inline] kernel32!GetCommandLineA -> mov eax,fake; ret
+[15:33:29.900 P=26556] Patched [inline] kernel32!GetCommandLineW -> mov eax,fake; ret
+[15:33:29.900 P=26556] Patched [inline] kernel32!TerminateProcess @ 0x751E2E00  orig=8BFF -> EB FE (hang loop)
+[15:33:29.901 P=26556] Patched [inline] kernel32!ExitProcess @ 0x751DB030  orig=558B -> EB FE (hang loop)
+[15:33:29.901 P=26556] [inline] VEH installed
+[15:33:29.902 P=26556] PatchThread starting (VEH+HWBP+MinHook refresh-loop mode)
+[15:33:29.902 P=26556] InitDirectSyscalls: SSN(NtQueryInformationProcess)=0x19 gadget@0x02320000 tail@0x77AB9345 wow64=1
+[15:33:29.903 P=26556] Hook targets: CreateProcessA=0x751E0460 CreateProcessW=0x751CD520
+[15:33:30.060 P=26556] MinHook: CreateProcessA/W and NtQueryInformationProcess hooks ACTIVE
+[15:33:30.109 P=26556] InitExitHooks: NtTerminateProcess hooked via MinHook at 0x77AB9490
+[15:33:30.148 P=26556] INTERESTING EXC: code=0xC000001D EIP=0x17FD394 flags=0x0 p0=0x0 p1=0x0
+[15:33:30.170 P=26556] INTERESTING EXC: code=0xC0000005 EIP=0x1803692 flags=0x0 p0=0x0 p1=0xFFFFFFFF
+[15:33:30.178 P=26556] InitExitHooks: RtlExitUserProcess hooked via MinHook at 0x77A74090
+[15:33:30.178 P=26556] Exit-API interception installed: 2 ntdll stub(s) via MinHook
+[15:33:30.179 P=26556] Wait hooks ENABLED immediately
+[15:33:30.223 P=26556] InitWaitHooks: WaitForSingleObject hooked at 0x751CE960
+[15:33:30.256 P=26556] [WFSO] TID=2064 h=0x000001B4 timeout=4294967295 name='<unnamed>' caller=0x0181F9DC
+[15:33:30.257 P=26556]   anon-INFINITE wait #1 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.258 P=26556]   [WFSO] TID=19336 h=0x000001E8 -> 0
+[15:33:30.258 P=26556] [WFSO] TID=19336 h=0x000001E8 timeout=4294967295 name='<unnamed>' caller=0x0182E14C
+[15:33:30.259 P=26556]   anon-INFINITE wait #2 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.259 P=26556]   [WFSO] TID=23316 h=0x000001C4 -> 0
+[15:33:30.260 P=26556] [WFSO] TID=23316 h=0x000001C4 timeout=4294967295 name='<unnamed>' caller=0x0182466B
+[15:33:30.260 P=26556]   anon-INFINITE wait #3 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.263 P=26556]   [WFSO] TID=11432 h=0x000001CC -> 0
+[15:33:30.264 P=26556] [WFSO] TID=11432 h=0x000001CC timeout=4294967295 name='<unnamed>' caller=0x01827245
+[15:33:30.265 P=26556]   anon-INFINITE wait #4 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.266 P=26556]   anon wait #4 signaled (r=0) after ~0 ms
+[15:33:30.266 P=26556] [WFSO] TID=11432 h=0x000001CC timeout=4294967295 name='<unnamed>' caller=0x01827245
+[15:33:30.267 P=26556]   anon-INFINITE wait #5 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.268 P=26556]   [WFSO] TID=23316 h=0x000001C4 -> 0
+[15:33:30.268 P=26556] [WFSO] TID=23316 h=0x000001C4 timeout=4294967295 name='<unnamed>' caller=0x0182466B
+[15:33:30.269 P=26556]   anon-INFINITE wait #6 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.338 P=26556] InitWaitHooks: WaitForSingleObjectEx hooked at 0x751CE970
+[15:33:30.545 P=26556] InitWaitHooks: WaitForMultipleObjects hooked at 0x751CE940
+[15:33:30.585 P=26556]   anon wait #5 signaled (r=0) after ~250 ms
+[15:33:30.586 P=26556] [WFSO] TID=11432 h=0x000001CC timeout=4294967295 name='<unnamed>' caller=0x01827245
+[15:33:30.587 P=26556]   anon-INFINITE wait #7 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.600 P=26556]   anon wait #7 signaled (r=0) after ~0 ms
+[15:33:30.601 P=26556] [WFSO] TID=11432 h=0x000001CC timeout=4294967295 name='<unnamed>' caller=0x01827245
+[15:33:30.603 P=26556]   anon-INFINITE wait #8 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.657 P=26556] InitWaitHooks: WaitForMultipleObjectsEx hooked at 0x751CE950
+[15:33:30.666 P=26556]   [WFSO] TID=23596 h=0x000001E4 -> 0
+[15:33:30.666 P=26556] [WFSO] TID=23596 h=0x000001E4 timeout=4294967295 name='<unnamed>' caller=0x0182D1D8
+[15:33:30.668 P=26556]   anon-INFINITE wait #9 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.668 P=26556]   [WFSO] TID=19336 h=0x000001E8 -> 0
+[15:33:30.669 P=26556] [WFSO] TID=19336 h=0x000001E8 timeout=4294967295 name='<unnamed>' caller=0x0182E14C
+[15:33:30.669 P=26556]   anon-INFINITE wait #10 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.752 P=26556]   [WFSO] TID=20752 h=0x000001C8 -> 0
+[15:33:30.753 P=26556] [WFSO] TID=20752 h=0x000001C8 timeout=4294967295 name='<unnamed>' caller=0x01826176
+[15:33:30.753 P=26556]   anon-INFINITE wait #11 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.779 P=26556] InitWaitHooks: MsgWaitForMultipleObjects hooked at 0x75348570
+[15:33:30.807 P=26556] [WFSOEx] TID=20308 h=0x0000042C timeout=4294967295 alertable=0 name='\Sessions\1\BaseNamedObjects\SM0:26556:168:WilStaging_02' caller=0x73BF32E4
+[15:33:30.808 P=26556]   [WFSOEx] TID=20308 h=0x0000042C -> 0
+[15:33:30.816 P=26556]   [WFSO] TID=23676 h=0x000001D8 -> 0
+[15:33:30.817 P=26556] [WFSO] TID=23676 h=0x000001D8 timeout=4294967295 name='<unnamed>' caller=0x0182A245
+[15:33:30.817 P=26556]   anon-INFINITE wait #12 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.825 P=26556]   anon wait #8 signaled (r=0) after ~0 ms
+[15:33:30.826 P=26556] [WFSO] TID=11432 h=0x000001CC timeout=4294967295 name='<unnamed>' caller=0x01827245
+[15:33:30.826 P=26556]   anon-INFINITE wait #13 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.828 P=26556]   [WFSO] TID=1484 h=0x000001D0 -> 0
+[15:33:30.829 P=26556] [WFSO] TID=1484 h=0x000001D0 timeout=4294967295 name='<unnamed>' caller=0x0182830A
+[15:33:30.830 P=26556]   anon-INFINITE wait #14 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.830 P=26556]   [WFSO] TID=2064 h=0x000001B4 -> 0
+[15:33:30.831 P=26556] [WFSO] TID=2064 h=0x000001B4 timeout=4294967295 name='<unnamed>' caller=0x0181F9DC
+[15:33:30.831 P=26556]   anon-INFINITE wait #15 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.832 P=26556]   [WFSO] TID=21084 h=0x000001B8 -> 0
+[15:33:30.833 P=26556] [WFSO] TID=21084 h=0x000001B8 timeout=4294967295 name='<unnamed>' caller=0x01820AAB
+[15:33:30.834 P=26556]   anon-INFINITE wait #16 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.836 P=26556]   [WFSO] TID=21232 h=0x000001C0 -> 0
+[15:33:30.836 P=26556] [WFSO] TID=21232 h=0x000001C0 timeout=4294967295 name='<unnamed>' caller=0x0182349A
+[15:33:30.837 P=26556]   anon-INFINITE wait #17 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.839 P=26556]   anon wait #9 signaled (r=0) after ~0 ms
+[15:33:30.839 P=26556] [WFSO] TID=23596 h=0x000001E4 timeout=4294967295 name='<unnamed>' caller=0x0182D1D8
+[15:33:30.840 P=26556]   anon-INFINITE wait #18 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.840 P=26556] [WFSO] TID=23676 h=0x000001D8 timeout=4294967295 name='<unnamed>' caller=0x0182A245
+[15:33:30.841 P=26556]   anon-INFINITE wait #19 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.853 P=26556] InitWaitHooks: MsgWaitForMultipleObjectsEx hooked at 0x75338160
+[15:33:30.854 P=26556] Image base: 0x00400000
+[15:33:30.854 P=26556] VEH already installed (inline from DllMain)
+[15:33:30.855 P=26556] Kill API hooks installed: 0 slot(s)
+[15:33:30.856 P=26556] Targets: validation=0xD3DC4D  MessageBoxW-IAT=0x19984D4 (will hijack after unpack)
+[15:33:30.856 P=26556] Patched kernel32!TerminateProcess @ 0x751E2E00  orig=EBFE -> EB FE (hang loop)
+[15:33:30.857 P=26556] Patched kernel32!ExitProcess @ 0x751DB030  orig=EBFE -> EB FE (hang loop)
+[15:33:30.857 P=26556] ntdll!NtCreateUserProcess resolved at 0x77AB9EE0
+[15:33:30.858 P=26556] kernel32!WaitForMultipleObjects resolved at 0x751CE940 (HWBP wait fallback target)
+[15:33:30.885 P=26556] NMRunParamDLL pre-loaded by patcher (game mode)
+[15:33:30.887 P=26556] NMRun game targets: SetParam=0x06B111E0 SetParam2=0x06B11200 RunProgram=0x06B11100
+[15:33:30.888 P=26556] NMRun game targets: Load=0x06B110C0 GetParam=0x06B11180 ExistsParam=0x06B11120 GetParamCount=0x06B11260
+[15:33:30.909 P=26556]   [WFSO] TID=2064 h=0x000001B4 -> 0
+[15:33:30.910 P=26556] [WFSO] TID=2064 h=0x000001B4 timeout=4294967295 name='<unnamed>' caller=0x0181F9DC
+[15:33:30.910 P=26556]   anon-INFINITE wait #20 -- 250ms timed-poll (never native INFINITE)
+[15:33:30.962 P=26556] NMRun.SetParam hook ENABLED
+[15:33:31.025 P=26556] NMRun.SetParam2 hook ENABLED
+[15:33:31.072 P=26556]   [WFSO] TID=14916 h=0x000001BC -> 0
+[15:33:31.074 P=26556] [WFSO] TID=14916 h=0x000001BC timeout=4294967295 name='<unnamed>' caller=0x01822526
+[15:33:31.088 P=26556]   [WFSO] TID=21084 h=0x000001B8 -> 0
+[15:33:31.088 P=26556] NMRun.RunProgram hook ENABLED
+[15:33:31.088 P=26556] [WFSO] TID=21084 h=0x000001B8 timeout=4294967295 name='<unnamed>' caller=0x01820AAB
+[15:33:31.092 P=26556]   [WFSO] TID=23676 h=0x000001D8 -> 0
+[15:33:31.093 P=26556] [WFSO] TID=23676 h=0x000001D8 timeout=4294967295 name='<unnamed>' caller=0x0182A245
+[15:33:31.096 P=26556]   anon wait #14 signaled (r=0) after ~250 ms
+[15:33:31.096 P=26556] [WFSO] TID=1484 h=0x000001D0 timeout=4294967295 name='<unnamed>' caller=0x0182830A
+[15:33:31.097 P=26556] [WFSO] TID=1484 h=0x000001D0 timeout=4294967295 name='<unnamed>' caller=0x0182830A
+[15:33:31.154 P=26556] NMRun.Load hook ENABLED (FAKE param mode)
+[15:33:31.217 P=26556] NMRun.GetParam hook ENABLED (FAKE param mode)
+[15:33:31.277 P=26556] NMRun.ExistsParam hook ENABLED (FAKE param mode)
+[15:33:31.342 P=26556] NMRun.GetParamCount hook ENABLED (FAKE param mode)
+[15:33:31.343 P=26556] NMRun game hooks installed (full fake param mode)
+[15:33:31.343 P=26556] Net targets: connect=0x775D7830 gethostbyname=0x775F2730 getaddrinfo=0x775C5DD0
+[15:33:31.404 P=26556] connect hook ENABLED
+[15:33:31.466 P=26556] gethostbyname hook ENABLED
+[15:33:31.530 P=26556] getaddrinfo hook ENABLED
+[15:33:31.531 P=26556] Network hooks installed (ws2_32 connect/DNS)
+[15:33:31.531 P=26556] GetCommandLine targets: A=0x751CD510 W=0x751CD7B0
+[15:33:31.595 P=26556] GetCommandLineA hook ENABLED
+[15:33:31.655 P=26556] GetCommandLineW hook ENABLED
+[15:33:31.656 P=26556] GetCommandLine hooks installed (NoPopup injection)
+[15:33:31.656 P=26556] WinAudit targets: CWExA=0x753C4A90 CWExW=0x7533E470 RCExA=0x753C54C0 RCExW=0x7533E510
+[15:33:31.720 P=26556] CreateWindowExA audit hook ENABLED
+[15:33:31.779 P=26556] CreateWindowExW audit hook ENABLED
+[15:33:31.841 P=26556] RegisterClassExA audit hook ENABLED
+[15:33:31.903 P=26556] RegisterClassExW audit hook ENABLED
+[15:33:31.904 P=26556] Window audit hooks installed (evidence-only)
+[15:33:31.905 P=26556] === loaded modules snapshot (post-WinAudit-install) ===
+[15:33:31.906 P=26556]   mod[0] base=0x00400000 size=0x159C000 Goley_.exe
+[15:33:31.906 P=26556]   mod[1] base=0x77A40000 size=0x1BF000 ntdll.dll
+[15:33:31.907 P=26556]   mod[2] base=0x751B0000 size=0xF0000 KERNEL32.DLL
+[15:33:31.908 P=26556]   mod[3] base=0x76A00000 size=0x2CD000 KERNELBASE.dll
+[15:33:31.908 P=26556]   mod[4] base=0x74D60000 size=0x91000 comctl32.dll
+[15:33:31.909 P=26556]   mod[5] base=0x756B0000 size=0x82000 ADVAPI32.dll
+[15:33:31.911 P=26556]   mod[6] base=0x768C0000 size=0xC7000 msvcrt.dll
+[15:33:31.911 P=26556]   mod[7] base=0x75770000 size=0x83000 sechost.dll
+[15:33:31.912 P=26556]   mod[8] base=0x776C0000 size=0xBC000 RPCRT4.dll
+[15:33:31.913 P=26556]   mod[9] base=0x75740000 size=0x22000 GDI32.dll
+[15:33:31.915 P=26556]   mod[10] base=0x75520000 size=0x1B000 win32u.dll
+[15:33:31.915 P=26556]   mod[11] base=0x767D0000 size=0xEC000 gdi32full.dll
+[15:33:31.916 P=26556]   mod[12] base=0x77530000 size=0x85000 msvcp_win.dll
+[15:33:31.917 P=26556]   mod[13] base=0x778E0000 size=0x110000 ucrtbase.dll
+[15:33:31.918 P=26556]   mod[14] base=0x75310000 size=0x1D6000 USER32.dll
+[15:33:31.919 P=26556]   mod[15] base=0x754F0000 size=0x25000 IMM32.DLL
+[15:33:31.920 P=26556]   mod[16] base=0x74D30000 size=0x28000 revival_patcher.dll
+[15:33:31.920 P=26556]   mod[17] base=0x775C0000 size=0x69000 WS2_32.dll
+[15:33:31.921 P=26556]   mod[18] base=0x74CF0000 size=0x33000 winmm.dll
+[15:33:31.921 P=26556]   mod[19] base=0x755E0000 size=0x52000 SHLWAPI.dll
+[15:33:31.922 P=26556]   mod[20] base=0x75FC0000 size=0x6E6000 Windows.Storage.dll
+[15:33:31.922 P=26556]   mod[21] base=0x74F10000 size=0x293000 combase.dll
+[15:33:31.924 P=26556]   mod[22] base=0x741F0000 size=0x1E5000 d3dx9_42.dll
+[15:33:31.926 P=26556]   mod[23] base=0x74950000 size=0x76000 DSOUND.dll
+[15:33:31.926 P=26556]   mod[24] base=0x74CC0000 size=0x25000 winmmbase.dll
+[15:33:31.927 P=26556]   mod[25] base=0x74810000 size=0x55000 powrprof.dll
+[15:33:31.927 P=26556]   mod[26] base=0x748B0000 size=0x9A000 ResampleDmo.DLL
+[15:33:31.928 P=26556]   mod[27] base=0x75800000 size=0xD1000 shcore.dll
+[15:33:31.928 P=26556]   mod[28] base=0x76D90000 size=0x9F000 OLEAUT32.dll
+[15:33:31.929 P=26556]   mod[29] base=0x74C50000 size=0x9000 msdmo.dll
+[15:33:31.931 P=26556]   mod[30] base=0x74890000 size=0xE000 UMPDC.dll
+[15:33:31.932 P=26556]   mod[31] base=0x741B0000 size=0x38000 DINPUT8.dll
+[15:33:31.933 P=26556]   mod[32] base=0x74030000 size=0x172000 inputhost.dll
+[15:33:31.934 P=26556]   mod[33] base=0x73F50000 size=0xDD000 CoreMessaging.dll
+[15:33:31.934 P=26556]   mod[34] base=0x10000000 size=0x7D000 mss32.dll
+[15:33:31.935 P=26556]   mod[35] base=0x060C0000 size=0x3E000 mss32midi.dll
+[15:33:31.935 P=26556]   mod[36] base=0x77630000 size=0x77000 bcryptPrimitives.dll
+[15:33:31.936 P=26556]   mod[37] base=0x73F20000 size=0x25000 IPHLPAPI.DLL
+[15:33:31.936 P=26556]   mod[38] base=0x74870000 size=0xA000 CRYPTBASE.DLL
+[15:33:31.937 P=26556]   mod[39] base=0x75970000 size=0x643000 SHELL32.dll
+[15:33:31.937 P=26556]   mod[40] base=0x77780000 size=0x153000 ole32.dll
+[15:33:31.938 P=26556]   mod[41] base=0x74EA0000 size=0x61000 WLDAP32.dll
+[15:33:31.939 P=26556]   mod[42] base=0x06A30000 size=0x49000 BugTrap.dll
+[15:33:31.940 P=26556]   mod[43] base=0x76CD0000 size=0xB5000 COMDLG32.dll
+[15:33:31.940 P=26556]   mod[44] base=0x74C20000 size=0x8000 VERSION.dll
+[15:33:31.941 P=26556]   mod[45] base=0x73CF0000 size=0x224000 WININET.dll
+[15:33:31.941 P=26556]   mod[46] base=0x58DE0000 size=0xA1000 dbghelp.dll
+[15:33:31.942 P=26556]   mod[47] base=0x73B70000 size=0x17A000 d3d9.dll
+[15:33:31.942 P=26556]   mod[48] base=0x73B40000 size=0x26000 dwmapi.dll
+[15:33:31.943 P=26556]   mod[49] base=0x73B00000 size=0x38000 dxcore.dll
+[15:33:31.943 P=26556]   mod[50] base=0x01AD0000 size=0xF000 PhysXLoader.dll
+[15:33:31.944 P=26556]   mod[51] base=0x06B10000 size=0x42000 NMRunParamDLL.dll
+[15:33:31.944 P=26556]   mod[52] base=0x73A70000 size=0x8B000 WINSPOOL.DRV
+[15:33:31.945 P=26556]   mod[53] base=0x73A20000 size=0x3E000 cfgmgr32.dll
+[15:33:31.948 P=26556]   mod[54] base=0x749D0000 size=0x15000 kernel.appcore.dll
+[15:33:31.948 P=26556]   mod[55] base=0x74780000 size=0x80000 uxtheme.dll
+[15:33:31.949 P=26556] === 56 module(s) total ===
+[15:33:31.949 P=26556] BugTrap targets: Save=0x06A40C0A Send=0x06A40CF8 SetFlags=0x06A3F0B9
+[15:33:32.016 P=26556] BT_SaveSnapshot hook ENABLED (dialog tetikleyicisi bypass)
+[15:33:32.091 P=26556] BT_SendSnapshot hook ENABLED
+[15:33:32.164 P=26556] BT_SetFlags hook ENABLED (silent mode zorlandi)
+[15:33:32.165 P=26556] BugTrap hooks installed (A+B+C dialog bypass)
+[15:33:32.657 P=26556] InitIpcHooks: 7/7 IPC observer hook(s) ACTIVE
+[15:33:32.658 P=26556] IPC observer hooks installed (CreateFileMapping/MapViewOfFile/DeviceIoControl)
+[15:33:32.659 P=26556] HB iter=0 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65596421
+[15:33:33.757 P=26556] HB iter=9 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65597515
+[15:33:34.851 P=26556] HB iter=18 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65598625
+[15:33:35.939 P=26556] HB iter=27 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65599703
+[15:33:37.026 P=26556] HB iter=36 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65600796
+[15:33:37.461 P=26556] iter 40 total_set=1320 hits[val=0] iat=0
+[15:33:38.117 P=26556] HB iter=45 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65601890
+[15:33:39.171 P=26556] HB iter=54 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65602937
+[15:33:40.248 P=26556] HB iter=63 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65604015
+[15:33:40.953 P=26556] --- thread EIP dump start ---
+[15:33:41.010 P=26556]   tid=20308 EIP=0x751DB030 (kernel32+0x2B030) ESP=0x001AFD44 [ESP]=0x008B988D (image+0x4B988D)
+[15:33:41.011 P=26556]   tid=15544 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0200FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:33:41.011 P=26556]   tid=16696 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0214FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:33:41.012 P=26556]   tid=16280 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0228FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:33:41.013 P=26556]   tid=23652 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x040FFBBC [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:41.016 P=26556]   tid=20264 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x042FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:41.017 P=26556]   tid=17432 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x043FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:41.017 P=26556]   tid=26956 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x044FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:41.018 P=26556]   tid=26536 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x045FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:41.018 P=26556]   tid=23036 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0473FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:41.019 P=26556]   tid=11460 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0487FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:41.020 P=26556]   tid=20568 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x049BFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:41.021 P=26556]   tid=18268 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x04AFFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:41.023 P=26556]   tid=2064 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04C3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:41.023 P=26556]   tid=21084 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04D7F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:41.023 P=26556]   tid=14916 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04EBF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:41.025 P=26556]   tid=21232 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04FFF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:41.026 P=26556]   tid=23316 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0513F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:41.026 P=26556]   tid=20752 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0527F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:41.027 P=26556]   tid=11432 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x053BF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:41.028 P=26556]   tid=1484 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x054FF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:41.031 P=26556]   tid=8036 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0563F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:41.032 P=26556]   tid=23676 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x057BF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:41.033 P=26556]   tid=25612 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x058FF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:41.033 P=26556]   tid=17756 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05A3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:41.034 P=26556]   tid=23596 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05B7F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:41.036 P=26556]   tid=19336 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05CBF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:41.037 P=26556]   tid=15184 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05DFF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:41.038 P=26556]   tid=1396 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05F3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:41.039 P=26556]   tid=20372 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0607FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:33:41.039 P=26556]   tid=21760 EIP=0x77AB978C (ntdll+0x7978C) ESP=0x06A2F964 [ESP]=0x76B5920F (kernelbase+0x15920F)
+[15:33:41.040 P=26556]   tid=2204 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0735FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:41.041 P=26556]   tid=19980 EIP=0x77ABAECC (ntdll+0x7AECC) ESP=0x074AFED4 [ESP]=0x76BD0273 (kernelbase+0x1D0273)
+[15:33:41.041 P=26556] --- thread EIP dump end (33 threads) ---
+[15:33:41.042 P=26556] [NtQIP-cmp self] hProc=0xFFFFFFFF  hooked: status=0xC0000004 ExitStatus=0x0 | real: status=0xC0000004 ExitStatus=0x0
+[15:33:41.286 P=26556] HB iter=71 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65605046
+[15:33:42.338 P=26556] iter 80 total_set=2640 hits[val=0] iat=0
+[15:33:42.390 P=26556] HB iter=80 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65606156
+[15:33:43.471 P=26556] HB iter=89 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65607234
+[15:33:44.549 P=26556] HB iter=98 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65608312
+[15:33:45.636 P=26556] HB iter=107 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65609406
+[15:33:46.718 P=26556] HB iter=116 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65610484
+[15:33:47.149 P=26556] iter 120 total_set=3960 hits[val=0] iat=0
+[15:33:47.803 P=26556] HB iter=125 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65611562
+[15:33:48.897 P=26556] HB iter=134 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65612656
+[15:33:49.972 P=26556] HB iter=143 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65613734
+[15:33:51.080 P=26556] HB iter=152 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65614843
+[15:33:52.040 P=26556] iter 160 total_set=5280 hits[val=0] iat=0
+[15:33:52.094 P=26556] HB iter=160 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65615859
+[15:33:53.141 P=26556] HB iter=168 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65616906
+[15:33:54.236 P=26556] HB iter=176 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65618000
+[15:33:55.341 P=26556] HB iter=185 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65619109
+[15:33:56.021 P=26556] --- thread EIP dump start ---
+[15:33:56.098 P=26556]   tid=20308 EIP=0x751DB030 (kernel32+0x2B030) ESP=0x001AFD44 [ESP]=0x008B988D (image+0x4B988D)
+[15:33:56.099 P=26556]   tid=15544 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0200FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:33:56.100 P=26556]   tid=16696 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0214FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:33:56.101 P=26556]   tid=16280 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0228FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:33:56.102 P=26556]   tid=23652 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x040FFBBC [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:56.102 P=26556]   tid=20264 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x042FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:56.104 P=26556]   tid=17432 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x043FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:56.106 P=26556]   tid=26956 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x044FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:56.107 P=26556]   tid=26536 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x045FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:56.107 P=26556]   tid=23036 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0473FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:56.108 P=26556]   tid=11460 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0487FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:56.109 P=26556]   tid=20568 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x049BFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:56.109 P=26556]   tid=18268 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x04AFFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:56.110 P=26556]   tid=2064 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04C3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:56.111 P=26556]   tid=21084 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04D7F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:56.112 P=26556]   tid=14916 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04EBF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:56.113 P=26556]   tid=21232 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04FFF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:56.114 P=26556]   tid=23316 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0513F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:56.114 P=26556]   tid=20752 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0527F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:56.115 P=26556]   tid=11432 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x053BF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:56.116 P=26556]   tid=1484 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x054FF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:56.116 P=26556]   tid=8036 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0563F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:56.117 P=26556]   tid=23676 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x057BF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:56.118 P=26556]   tid=25612 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x058FF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:56.119 P=26556]   tid=17756 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05A3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:56.122 P=26556]   tid=23596 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05B7F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:56.123 P=26556]   tid=19336 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05CBF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:56.124 P=26556]   tid=15184 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05DFF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:56.125 P=26556]   tid=1396 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05F3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:33:56.126 P=26556]   tid=20372 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0607FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:33:56.127 P=26556]   tid=21760 EIP=0x77AB978C (ntdll+0x7978C) ESP=0x06A2F964 [ESP]=0x76B5920F (kernelbase+0x15920F)
+[15:33:56.127 P=26556]   tid=2204 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0735FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:33:56.128 P=26556]   tid=19980 EIP=0x77ABAECC (ntdll+0x7AECC) ESP=0x074AFED4 [ESP]=0x76BD0273 (kernelbase+0x1D0273)
+[15:33:56.129 P=26556] --- thread EIP dump end (33 threads) ---
+[15:33:56.129 P=26556] [NtQIP-cmp self] hProc=0xFFFFFFFF  hooked: status=0xC0000004 ExitStatus=0x0 | real: status=0xC0000004 ExitStatus=0x0
+[15:33:56.396 P=26556] HB iter=192 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65620156
+[15:33:57.284 P=26556] iter 200 total_set=6600 hits[val=0] iat=0
+[15:33:57.460 P=26556] HB iter=201 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65621234
+[15:33:58.490 P=26556] HB iter=209 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65622250
+[15:33:59.585 P=26556] HB iter=217 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65623343
+[15:34:00.698 P=26556] HB iter=225 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65624468
+[15:34:00.983 P=26556]   anon wait #11 still blocked after 30000 ms (poll continues)
+[15:34:01.077 P=26556]   anon wait #13 still blocked after 30000 ms (poll continues)
+[15:34:01.171 P=26556]   anon wait #20 still blocked after 30000 ms (poll continues)
+[15:34:01.342 P=26556]   anon wait #25 still blocked after 30000 ms (poll continues)
+[15:34:01.796 P=26556] HB iter=233 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65625562
+[15:34:02.726 P=26556] iter 240 total_set=7948 hits[val=0] iat=0
+[15:34:02.929 P=26556] HB iter=241 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65626687
+[15:34:04.058 P=26556] HB iter=249 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65627828
+[15:34:05.183 P=26556] HB iter=257 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65628953
+[15:34:06.040 P=26556] === loaded modules snapshot (periodic-30s) ===
+[15:34:06.041 P=26556]   mod[0] base=0x00400000 size=0x159C000 Goley_.exe
+[15:34:06.044 P=26556]   mod[1] base=0x77A40000 size=0x1BF000 ntdll.dll
+[15:34:06.045 P=26556]   mod[2] base=0x751B0000 size=0xF0000 KERNEL32.DLL
+[15:34:06.045 P=26556]   mod[3] base=0x76A00000 size=0x2CD000 KERNELBASE.dll
+[15:34:06.046 P=26556]   mod[4] base=0x74D60000 size=0x91000 comctl32.dll
+[15:34:06.047 P=26556]   mod[5] base=0x756B0000 size=0x82000 ADVAPI32.dll
+[15:34:06.047 P=26556]   mod[6] base=0x768C0000 size=0xC7000 msvcrt.dll
+[15:34:06.048 P=26556]   mod[7] base=0x75770000 size=0x83000 sechost.dll
+[15:34:06.048 P=26556]   mod[8] base=0x776C0000 size=0xBC000 RPCRT4.dll
+[15:34:06.050 P=26556]   mod[9] base=0x75740000 size=0x22000 GDI32.dll
+[15:34:06.051 P=26556]   mod[10] base=0x75520000 size=0x1B000 win32u.dll
+[15:34:06.051 P=26556]   mod[11] base=0x767D0000 size=0xEC000 gdi32full.dll
+[15:34:06.052 P=26556]   mod[12] base=0x77530000 size=0x85000 msvcp_win.dll
+[15:34:06.053 P=26556]   mod[13] base=0x778E0000 size=0x110000 ucrtbase.dll
+[15:34:06.053 P=26556]   mod[14] base=0x75310000 size=0x1D6000 USER32.dll
+[15:34:06.053 P=26556]   mod[15] base=0x754F0000 size=0x25000 IMM32.DLL
+[15:34:06.053 P=26556]   mod[16] base=0x74D30000 size=0x28000 revival_patcher.dll
+[15:34:06.054 P=26556]   mod[17] base=0x775C0000 size=0x69000 WS2_32.dll
+[15:34:06.054 P=26556]   mod[18] base=0x74CF0000 size=0x33000 winmm.dll
+[15:34:06.056 P=26556]   mod[19] base=0x755E0000 size=0x52000 SHLWAPI.dll
+[15:34:06.058 P=26556]   mod[20] base=0x75FC0000 size=0x6E6000 Windows.Storage.dll
+[15:34:06.060 P=26556]   mod[21] base=0x74F10000 size=0x293000 combase.dll
+[15:34:06.060 P=26556]   mod[22] base=0x741F0000 size=0x1E5000 d3dx9_42.dll
+[15:34:06.061 P=26556]   mod[23] base=0x74950000 size=0x76000 DSOUND.dll
+[15:34:06.061 P=26556]   mod[24] base=0x74CC0000 size=0x25000 winmmbase.dll
+[15:34:06.063 P=26556]   mod[25] base=0x74810000 size=0x55000 powrprof.dll
+[15:34:06.064 P=26556]   mod[26] base=0x748B0000 size=0x9A000 ResampleDmo.DLL
+[15:34:06.065 P=26556]   mod[27] base=0x75800000 size=0xD1000 shcore.dll
+[15:34:06.065 P=26556]   mod[28] base=0x76D90000 size=0x9F000 OLEAUT32.dll
+[15:34:06.066 P=26556]   mod[29] base=0x74C50000 size=0x9000 msdmo.dll
+[15:34:06.066 P=26556]   mod[30] base=0x74890000 size=0xE000 UMPDC.dll
+[15:34:06.067 P=26556]   mod[31] base=0x741B0000 size=0x38000 DINPUT8.dll
+[15:34:06.067 P=26556]   mod[32] base=0x74030000 size=0x172000 inputhost.dll
+[15:34:06.068 P=26556]   mod[33] base=0x73F50000 size=0xDD000 CoreMessaging.dll
+[15:34:06.068 P=26556]   mod[34] base=0x10000000 size=0x7D000 mss32.dll
+[15:34:06.069 P=26556]   mod[35] base=0x060C0000 size=0x3E000 mss32midi.dll
+[15:34:06.069 P=26556]   mod[36] base=0x77630000 size=0x77000 bcryptPrimitives.dll
+[15:34:06.070 P=26556]   mod[37] base=0x73F20000 size=0x25000 IPHLPAPI.DLL
+[15:34:06.071 P=26556]   mod[38] base=0x74870000 size=0xA000 CRYPTBASE.DLL
+[15:34:06.072 P=26556]   mod[39] base=0x75970000 size=0x643000 SHELL32.dll
+[15:34:06.072 P=26556]   mod[40] base=0x77780000 size=0x153000 ole32.dll
+[15:34:06.073 P=26556]   mod[41] base=0x74EA0000 size=0x61000 WLDAP32.dll
+[15:34:06.076 P=26556]   mod[42] base=0x06A30000 size=0x49000 BugTrap.dll
+[15:34:06.077 P=26556]   mod[43] base=0x76CD0000 size=0xB5000 COMDLG32.dll
+[15:34:06.078 P=26556]   mod[44] base=0x74C20000 size=0x8000 VERSION.dll
+[15:34:06.078 P=26556]   mod[45] base=0x73CF0000 size=0x224000 WININET.dll
+[15:34:06.079 P=26556]   mod[46] base=0x58DE0000 size=0xA1000 dbghelp.dll
+[15:34:06.079 P=26556]   mod[47] base=0x73B70000 size=0x17A000 d3d9.dll
+[15:34:06.080 P=26556]   mod[48] base=0x73B40000 size=0x26000 dwmapi.dll
+[15:34:06.080 P=26556]   mod[49] base=0x73B00000 size=0x38000 dxcore.dll
+[15:34:06.081 P=26556]   mod[50] base=0x01AD0000 size=0xF000 PhysXLoader.dll
+[15:34:06.081 P=26556]   mod[51] base=0x06B10000 size=0x42000 NMRunParamDLL.dll
+[15:34:06.082 P=26556]   mod[52] base=0x73A70000 size=0x8B000 WINSPOOL.DRV
+[15:34:06.082 P=26556]   mod[53] base=0x73A20000 size=0x3E000 cfgmgr32.dll
+[15:34:06.083 P=26556]   mod[54] base=0x749D0000 size=0x15000 kernel.appcore.dll
+[15:34:06.084 P=26556]   mod[55] base=0x74780000 size=0x80000 uxtheme.dll
+[15:34:06.085 P=26556] === 56 module(s) total ===
+[15:34:06.207 P=26556] HB iter=265 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65629968
+[15:34:07.314 P=26556] HB iter=274 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65631078
+[15:34:07.996 P=26556] iter 280 total_set=9348 hits[val=0] iat=0
+[15:34:08.402 P=26556] HB iter=283 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65632171
+[15:34:09.507 P=26556] HB iter=292 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65633265
+[15:34:10.600 P=26556] HB iter=301 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65634359
+[15:34:11.108 P=26556] --- thread EIP dump start ---
+[15:34:11.167 P=26556]   tid=20308 EIP=0x751DB030 (kernel32+0x2B030) ESP=0x001AFD44 [ESP]=0x008B988D (image+0x4B988D)
+[15:34:11.168 P=26556]   tid=15544 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0200FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:11.169 P=26556]   tid=16696 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0214FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:11.170 P=26556]   tid=16280 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0228FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:11.171 P=26556]   tid=23652 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x040FFBBC [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:11.171 P=26556]   tid=20264 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x042FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:11.172 P=26556]   tid=17432 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x043FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:11.173 P=26556]   tid=26956 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x044FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:11.173 P=26556]   tid=26536 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x045FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:11.174 P=26556]   tid=23036 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0473FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:11.175 P=26556]   tid=11460 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0487FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:11.176 P=26556]   tid=20568 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x049BFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:11.177 P=26556]   tid=18268 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x04AFFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:11.178 P=26556]   tid=2064 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04C3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:11.178 P=26556]   tid=21084 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04D7F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:11.179 P=26556]   tid=14916 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04EBF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:11.182 P=26556]   tid=21232 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04FFF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:11.183 P=26556]   tid=23316 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0513F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:11.184 P=26556]   tid=20752 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0527F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:11.185 P=26556]   tid=11432 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x053BF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:11.185 P=26556]   tid=1484 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x054FF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:11.186 P=26556]   tid=8036 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0563F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:11.187 P=26556]   tid=23676 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x057BF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:11.189 P=26556]   tid=25612 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x058FF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:11.189 P=26556]   tid=17756 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05A3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:11.190 P=26556]   tid=23596 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05B7F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:11.191 P=26556]   tid=19336 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05CBF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:11.191 P=26556]   tid=15184 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05DFF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:11.192 P=26556]   tid=1396 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05F3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:11.193 P=26556]   tid=20372 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0607FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:11.193 P=26556]   tid=21760 EIP=0x77AB978C (ntdll+0x7978C) ESP=0x06A2F964 [ESP]=0x76B5920F (kernelbase+0x15920F)
+[15:34:11.195 P=26556]   tid=2204 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0735FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:11.197 P=26556]   tid=19980 EIP=0x77ABAECC (ntdll+0x7AECC) ESP=0x074AFED4 [ESP]=0x76BD0273 (kernelbase+0x1D0273)
+[15:34:11.198 P=26556]   tid=10344 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x078EFDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:11.198 P=26556]   tid=15628 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x07A2FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:11.199 P=26556] --- thread EIP dump end (35 threads) ---
+[15:34:11.199 P=26556] [NtQIP-cmp self] hProc=0xFFFFFFFF  hooked: status=0xC0000004 ExitStatus=0x0 | real: status=0xC0000004 ExitStatus=0x0
+[15:34:11.689 P=26556] HB iter=309 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65635453
+[15:34:12.783 P=26556] HB iter=318 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65636546
+[15:34:12.982 P=26556] iter 320 total_set=10748 hits[val=0] iat=0
+[15:34:13.878 P=26556] HB iter=327 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65637640
+[15:34:14.962 P=26556] HB iter=336 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65638734
+[15:34:16.006 P=26556] HB iter=345 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65639765
+[15:34:17.063 P=26556] HB iter=354 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65640828
+[15:34:17.710 P=26556] iter 360 total_set=12148 hits[val=0] iat=0
+[15:34:18.119 P=26556] HB iter=363 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65641890
+[15:34:19.168 P=26556] HB iter=372 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65642937
+[15:34:20.227 P=26556] HB iter=381 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65644000
+[15:34:21.272 P=26556] HB iter=390 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65645031
+[15:34:22.337 P=26556] HB iter=399 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65646109
+[15:34:22.406 P=26556] iter 400 total_set=13548 hits[val=0] iat=0
+[15:34:23.381 P=26556] HB iter=408 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65647140
+[15:34:24.427 P=26556] HB iter=417 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65648187
+[15:34:25.493 P=26556] HB iter=426 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65649265
+[15:34:26.113 P=26556] --- thread EIP dump start ---
+[15:34:26.175 P=26556]   tid=20308 EIP=0x751DB030 (kernel32+0x2B030) ESP=0x001AFD44 [ESP]=0x008B988D (image+0x4B988D)
+[15:34:26.176 P=26556]   tid=15544 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0200FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:26.177 P=26556]   tid=16696 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0214FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:26.177 P=26556]   tid=16280 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0228FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:26.178 P=26556]   tid=23652 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x040FFBBC [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:26.179 P=26556]   tid=20264 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x042FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:26.179 P=26556]   tid=17432 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x043FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:26.180 P=26556]   tid=26956 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x044FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:26.181 P=26556]   tid=26536 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x045FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:26.183 P=26556]   tid=23036 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0473FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:26.184 P=26556]   tid=11460 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0487FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:26.184 P=26556]   tid=20568 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x049BFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:26.185 P=26556]   tid=18268 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x04AFFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:26.186 P=26556]   tid=2064 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04C3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:26.186 P=26556]   tid=21084 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04D7F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:26.188 P=26556]   tid=14916 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04EBF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:26.189 P=26556]   tid=21232 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04FFF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:26.190 P=26556]   tid=23316 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0513F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:26.191 P=26556]   tid=20752 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0527F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:26.191 P=26556]   tid=11432 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x053BF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:26.192 P=26556]   tid=1484 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x054FF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:26.193 P=26556]   tid=8036 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0563F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:26.194 P=26556]   tid=23676 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x057BF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:26.195 P=26556]   tid=25612 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x058FF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:26.195 P=26556]   tid=17756 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05A3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:26.196 P=26556]   tid=23596 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05B7F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:26.197 P=26556]   tid=19336 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05CBF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:26.198 P=26556]   tid=15184 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05DFF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:26.198 P=26556]   tid=1396 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05F3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:26.199 P=26556]   tid=20372 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0607FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:26.203 P=26556]   tid=21760 EIP=0x77AB978C (ntdll+0x7978C) ESP=0x06A2F964 [ESP]=0x76B5920F (kernelbase+0x15920F)
+[15:34:26.204 P=26556]   tid=2204 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0735FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:26.204 P=26556]   tid=19980 EIP=0x77ABAECC (ntdll+0x7AECC) ESP=0x074AFED4 [ESP]=0x76BD0273 (kernelbase+0x1D0273)
+[15:34:26.205 P=26556]   tid=10344 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x078EFDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:26.206 P=26556]   tid=15628 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x07A2FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:26.206 P=26556] --- thread EIP dump end (35 threads) ---
+[15:34:26.207 P=26556] [NtQIP-cmp self] hProc=0xFFFFFFFF  hooked: status=0xC0000004 ExitStatus=0x0 | real: status=0xC0000004 ExitStatus=0x0
+[15:34:26.583 P=26556] HB iter=434 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65650343
+[15:34:27.272 P=26556] iter 440 total_set=14948 hits[val=0] iat=0
+[15:34:27.692 P=26556] HB iter=443 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65651453
+[15:34:28.796 P=26556] HB iter=452 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65652562
+[15:34:29.907 P=26556] HB iter=461 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65653671
+[15:34:31.029 P=26556] HB iter=470 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65654796
+[15:34:31.104 P=26556]   anon wait #11 still blocked after 60000 ms (poll continues)
+[15:34:31.184 P=26556]   anon wait #13 still blocked after 60000 ms (poll continues)
+[15:34:31.280 P=26556]   anon wait #20 still blocked after 60000 ms (poll continues)
+[15:34:31.434 P=26556]   anon wait #21 still blocked after 60000 ms (poll continues)
+[15:34:31.451 P=26556]   anon wait #25 still blocked after 60000 ms (poll continues)
+[15:34:32.139 P=26556] HB iter=479 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65655906
+[15:34:32.217 P=26556] iter 480 total_set=16348 hits[val=0] iat=0
+[15:34:33.241 P=26556] HB iter=488 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65657000
+[15:34:34.344 P=26556] HB iter=497 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65658109
+[15:34:35.363 P=26556] HB iter=505 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65659125
+[15:34:36.161 P=26556] === loaded modules snapshot (periodic-30s) ===
+[15:34:36.163 P=26556]   mod[0] base=0x00400000 size=0x159C000 Goley_.exe
+[15:34:36.164 P=26556]   mod[1] base=0x77A40000 size=0x1BF000 ntdll.dll
+[15:34:36.168 P=26556]   mod[2] base=0x751B0000 size=0xF0000 KERNEL32.DLL
+[15:34:36.170 P=26556]   mod[3] base=0x76A00000 size=0x2CD000 KERNELBASE.dll
+[15:34:36.172 P=26556]   mod[4] base=0x74D60000 size=0x91000 comctl32.dll
+[15:34:36.176 P=26556]   mod[5] base=0x756B0000 size=0x82000 ADVAPI32.dll
+[15:34:36.178 P=26556]   mod[6] base=0x768C0000 size=0xC7000 msvcrt.dll
+[15:34:36.181 P=26556]   mod[7] base=0x75770000 size=0x83000 sechost.dll
+[15:34:36.184 P=26556]   mod[8] base=0x776C0000 size=0xBC000 RPCRT4.dll
+[15:34:36.185 P=26556]   mod[9] base=0x75740000 size=0x22000 GDI32.dll
+[15:34:36.186 P=26556]   mod[10] base=0x75520000 size=0x1B000 win32u.dll
+[15:34:36.192 P=26556]   mod[11] base=0x767D0000 size=0xEC000 gdi32full.dll
+[15:34:36.194 P=26556]   mod[12] base=0x77530000 size=0x85000 msvcp_win.dll
+[15:34:36.197 P=26556]   mod[13] base=0x778E0000 size=0x110000 ucrtbase.dll
+[15:34:36.201 P=26556]   mod[14] base=0x75310000 size=0x1D6000 USER32.dll
+[15:34:36.204 P=26556]   mod[15] base=0x754F0000 size=0x25000 IMM32.DLL
+[15:34:36.205 P=26556]   mod[16] base=0x74D30000 size=0x28000 revival_patcher.dll
+[15:34:36.206 P=26556]   mod[17] base=0x775C0000 size=0x69000 WS2_32.dll
+[15:34:36.209 P=26556]   mod[18] base=0x74CF0000 size=0x33000 winmm.dll
+[15:34:36.210 P=26556]   mod[19] base=0x755E0000 size=0x52000 SHLWAPI.dll
+[15:34:36.212 P=26556]   mod[20] base=0x75FC0000 size=0x6E6000 Windows.Storage.dll
+[15:34:36.213 P=26556]   mod[21] base=0x74F10000 size=0x293000 combase.dll
+[15:34:36.216 P=26556]   mod[22] base=0x741F0000 size=0x1E5000 d3dx9_42.dll
+[15:34:36.218 P=26556]   mod[23] base=0x74950000 size=0x76000 DSOUND.dll
+[15:34:36.219 P=26556]   mod[24] base=0x74CC0000 size=0x25000 winmmbase.dll
+[15:34:36.220 P=26556]   mod[25] base=0x74810000 size=0x55000 powrprof.dll
+[15:34:36.222 P=26556]   mod[26] base=0x748B0000 size=0x9A000 ResampleDmo.DLL
+[15:34:36.224 P=26556]   mod[27] base=0x75800000 size=0xD1000 shcore.dll
+[15:34:36.225 P=26556]   mod[28] base=0x76D90000 size=0x9F000 OLEAUT32.dll
+[15:34:36.227 P=26556]   mod[29] base=0x74C50000 size=0x9000 msdmo.dll
+[15:34:36.229 P=26556]   mod[30] base=0x74890000 size=0xE000 UMPDC.dll
+[15:34:36.231 P=26556]   mod[31] base=0x741B0000 size=0x38000 DINPUT8.dll
+[15:34:36.232 P=26556]   mod[32] base=0x74030000 size=0x172000 inputhost.dll
+[15:34:36.233 P=26556]   mod[33] base=0x73F50000 size=0xDD000 CoreMessaging.dll
+[15:34:36.234 P=26556]   mod[34] base=0x10000000 size=0x7D000 mss32.dll
+[15:34:36.234 P=26556]   mod[35] base=0x060C0000 size=0x3E000 mss32midi.dll
+[15:34:36.235 P=26556]   mod[36] base=0x77630000 size=0x77000 bcryptPrimitives.dll
+[15:34:36.236 P=26556]   mod[37] base=0x73F20000 size=0x25000 IPHLPAPI.DLL
+[15:34:36.237 P=26556]   mod[38] base=0x74870000 size=0xA000 CRYPTBASE.DLL
+[15:34:36.237 P=26556]   mod[39] base=0x75970000 size=0x643000 SHELL32.dll
+[15:34:36.238 P=26556]   mod[40] base=0x77780000 size=0x153000 ole32.dll
+[15:34:36.238 P=26556]   mod[41] base=0x74EA0000 size=0x61000 WLDAP32.dll
+[15:34:36.239 P=26556]   mod[42] base=0x06A30000 size=0x49000 BugTrap.dll
+[15:34:36.239 P=26556]   mod[43] base=0x76CD0000 size=0xB5000 COMDLG32.dll
+[15:34:36.240 P=26556]   mod[44] base=0x74C20000 size=0x8000 VERSION.dll
+[15:34:36.240 P=26556]   mod[45] base=0x73CF0000 size=0x224000 WININET.dll
+[15:34:36.241 P=26556]   mod[46] base=0x58DE0000 size=0xA1000 dbghelp.dll
+[15:34:36.244 P=26556]   mod[47] base=0x73B70000 size=0x17A000 d3d9.dll
+[15:34:36.244 P=26556]   mod[48] base=0x73B40000 size=0x26000 dwmapi.dll
+[15:34:36.245 P=26556]   mod[49] base=0x73B00000 size=0x38000 dxcore.dll
+[15:34:36.245 P=26556]   mod[50] base=0x01AD0000 size=0xF000 PhysXLoader.dll
+[15:34:36.246 P=26556]   mod[51] base=0x06B10000 size=0x42000 NMRunParamDLL.dll
+[15:34:36.246 P=26556]   mod[52] base=0x73A70000 size=0x8B000 WINSPOOL.DRV
+[15:34:36.247 P=26556]   mod[53] base=0x73A20000 size=0x3E000 cfgmgr32.dll
+[15:34:36.247 P=26556]   mod[54] base=0x749D0000 size=0x15000 kernel.appcore.dll
+[15:34:36.248 P=26556]   mod[55] base=0x74780000 size=0x80000 uxtheme.dll
+[15:34:36.248 P=26556] === 56 module(s) total ===
+[15:34:36.375 P=26556] HB iter=512 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65660140
+[15:34:37.301 P=26556] iter 520 total_set=17748 hits[val=0] iat=0
+[15:34:37.488 P=26556] HB iter=521 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65661250
+[15:34:38.540 P=26556] HB iter=529 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65662312
+[15:34:39.576 P=26556] HB iter=537 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65663343
+[15:34:40.630 P=26556] HB iter=545 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65664390
+[15:34:41.156 P=26556] --- thread EIP dump start ---
+[15:34:41.220 P=26556]   tid=20308 EIP=0x751DB030 (kernel32+0x2B030) ESP=0x001AFD44 [ESP]=0x008B988D (image+0x4B988D)
+[15:34:41.221 P=26556]   tid=15544 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0200FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:41.222 P=26556]   tid=16696 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0214FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:41.223 P=26556]   tid=16280 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0228FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:41.224 P=26556]   tid=23652 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x040FFBBC [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:41.225 P=26556]   tid=20264 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x042FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:41.225 P=26556]   tid=17432 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x043FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:41.226 P=26556]   tid=26956 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x044FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:41.227 P=26556]   tid=26536 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x045FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:41.228 P=26556]   tid=23036 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0473FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:41.228 P=26556]   tid=11460 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0487FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:41.229 P=26556]   tid=20568 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x049BFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:41.230 P=26556]   tid=18268 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x04AFFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:41.231 P=26556]   tid=2064 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04C3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:41.232 P=26556]   tid=21084 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04D7F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:41.233 P=26556]   tid=14916 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04EBF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:41.233 P=26556]   tid=21232 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04FFF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:41.234 P=26556]   tid=23316 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0513F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:41.236 P=26556]   tid=20752 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0527F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:41.237 P=26556]   tid=11432 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x053BF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:41.238 P=26556]   tid=1484 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x054FF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:41.239 P=26556]   tid=8036 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0563F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:41.239 P=26556]   tid=23676 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x057BF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:41.240 P=26556]   tid=25612 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x058FF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:41.241 P=26556]   tid=17756 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05A3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:41.241 P=26556]   tid=23596 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05B7F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:41.242 P=26556]   tid=19336 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05CBF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:41.243 P=26556]   tid=15184 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05DFF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:41.244 P=26556]   tid=1396 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05F3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:41.244 P=26556]   tid=20372 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0607FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:41.245 P=26556]   tid=21760 EIP=0x77AB978C (ntdll+0x7978C) ESP=0x06A2F964 [ESP]=0x76B5920F (kernelbase+0x15920F)
+[15:34:41.246 P=26556]   tid=2204 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0735FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:41.247 P=26556]   tid=19980 EIP=0x77ABAECC (ntdll+0x7AECC) ESP=0x074AFED4 [ESP]=0x76BD0273 (kernelbase+0x1D0273)
+[15:34:41.247 P=26556]   tid=10344 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x078EFDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:41.248 P=26556]   tid=15628 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x07A2FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:41.249 P=26556] --- thread EIP dump end (35 threads) ---
+[15:34:41.252 P=26556] [NtQIP-cmp self] hProc=0xFFFFFFFF  hooked: status=0xC0000004 ExitStatus=0x0 | real: status=0xC0000004 ExitStatus=0x0
+[15:34:41.637 P=26556] HB iter=552 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65665406
+[15:34:42.683 P=26556] iter 560 total_set=19148 hits[val=0] iat=0
+[15:34:42.750 P=26556] HB iter=560 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65666515
+[15:34:43.877 P=26556] HB iter=568 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65667640
+[15:34:44.923 P=26556] HB iter=576 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65668687
+[15:34:45.998 P=26556] HB iter=584 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65669765
+[15:34:47.016 P=26556] HB iter=592 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65670781
+[15:34:47.967 P=26556] iter 600 total_set=20548 hits[val=0] iat=0
+[15:34:48.032 P=26556] HB iter=600 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65671796
+[15:34:49.172 P=26556] HB iter=609 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65672937
+[15:34:50.206 P=26556] HB iter=617 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65673968
+[15:34:51.252 P=26556] HB iter=626 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65675015
+[15:34:52.327 P=26556] HB iter=635 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65676093
+[15:34:52.854 P=26556] iter 640 total_set=21948 hits[val=0] iat=0
+[15:34:53.374 P=26556] HB iter=644 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65677140
+[15:34:54.463 P=26556] HB iter=653 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65678234
+[15:34:55.487 P=26556] HB iter=662 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65679250
+[15:34:56.183 P=26556] --- thread EIP dump start ---
+[15:34:56.242 P=26556]   tid=20308 EIP=0x751DB030 (kernel32+0x2B030) ESP=0x001AFD44 [ESP]=0x008B988D (image+0x4B988D)
+[15:34:56.244 P=26556]   tid=15544 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0200FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:56.244 P=26556]   tid=16696 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0214FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:56.245 P=26556]   tid=16280 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0228FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:56.246 P=26556]   tid=23652 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x040FFBBC [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:56.246 P=26556]   tid=20264 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x042FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:56.247 P=26556]   tid=17432 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x043FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:56.248 P=26556]   tid=26956 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x044FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:56.248 P=26556]   tid=26536 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x045FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:56.249 P=26556]   tid=23036 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0473FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:56.250 P=26556]   tid=11460 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0487FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:56.260 P=26556]   tid=20568 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x049BFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:56.260 P=26556]   tid=18268 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x04AFFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:56.261 P=26556]   tid=2064 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04C3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:56.262 P=26556]   tid=21084 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04D7F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:56.262 P=26556]   tid=14916 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04EBF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:56.263 P=26556]   tid=21232 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04FFF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:56.264 P=26556]   tid=23316 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0513F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:56.264 P=26556]   tid=20752 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0527F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:56.265 P=26556]   tid=11432 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x053BF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:56.266 P=26556]   tid=1484 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x054FF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:56.268 P=26556]   tid=8036 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0563F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:56.270 P=26556]   tid=23676 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x057BF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:56.271 P=26556]   tid=25612 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x058FF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:56.272 P=26556]   tid=17756 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05A3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:56.273 P=26556]   tid=23596 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05B7F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:56.273 P=26556]   tid=19336 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05CBF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:56.274 P=26556]   tid=15184 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05DFF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:56.274 P=26556]   tid=1396 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05F3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:34:56.275 P=26556]   tid=20372 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0607FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:56.276 P=26556]   tid=21760 EIP=0x77AB978C (ntdll+0x7978C) ESP=0x06A2F964 [ESP]=0x76B5920F (kernelbase+0x15920F)
+[15:34:56.277 P=26556]   tid=2204 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0735FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:34:56.277 P=26556]   tid=19980 EIP=0x77ABAECC (ntdll+0x7AECC) ESP=0x074AFED4 [ESP]=0x76BD0273 (kernelbase+0x1D0273)
+[15:34:56.278 P=26556]   tid=10344 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x078EFDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:56.279 P=26556]   tid=15628 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x07A2FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:34:56.280 P=26556] --- thread EIP dump end (35 threads) ---
+[15:34:56.280 P=26556] [NtQIP-cmp self] hProc=0xFFFFFFFF  hooked: status=0xC0000004 ExitStatus=0x0 | real: status=0xC0000004 ExitStatus=0x0
+[15:34:56.513 P=26556] HB iter=670 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65680281
+[15:34:57.548 P=26556] HB iter=679 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65681312
+[15:34:57.622 P=26556] iter 680 total_set=23348 hits[val=0] iat=0
+[15:34:58.580 P=26556] HB iter=688 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65682343
+[15:34:59.624 P=26556] HB iter=697 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65683390
+[15:35:00.654 P=26556] HB iter=706 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65684421
+[15:35:01.374 P=26556]   anon wait #11 still blocked after 90000 ms (poll continues)
+[15:35:01.402 P=26556]   anon wait #13 still blocked after 90000 ms (poll continues)
+[15:35:01.543 P=26556]   anon wait #20 still blocked after 90000 ms (poll continues)
+[15:35:01.653 P=26556]   anon wait #25 still blocked after 90000 ms (poll continues)
+[15:35:01.778 P=26556] HB iter=715 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65685546
+[15:35:02.410 P=26556] iter 720 total_set=24748 hits[val=0] iat=0
+[15:35:02.878 P=26556] HB iter=723 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65686640
+[15:35:03.951 P=26556] HB iter=732 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65687718
+[15:35:04.980 P=26556] HB iter=741 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65688750
+[15:35:06.019 P=26556] HB iter=750 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65689781
+[15:35:06.262 P=26556] === loaded modules snapshot (periodic-30s) ===
+[15:35:06.263 P=26556]   mod[0] base=0x00400000 size=0x159C000 Goley_.exe
+[15:35:06.265 P=26556]   mod[1] base=0x77A40000 size=0x1BF000 ntdll.dll
+[15:35:06.266 P=26556]   mod[2] base=0x751B0000 size=0xF0000 KERNEL32.DLL
+[15:35:06.267 P=26556]   mod[3] base=0x76A00000 size=0x2CD000 KERNELBASE.dll
+[15:35:06.268 P=26556]   mod[4] base=0x74D60000 size=0x91000 comctl32.dll
+[15:35:06.269 P=26556]   mod[5] base=0x756B0000 size=0x82000 ADVAPI32.dll
+[15:35:06.269 P=26556]   mod[6] base=0x768C0000 size=0xC7000 msvcrt.dll
+[15:35:06.271 P=26556]   mod[7] base=0x75770000 size=0x83000 sechost.dll
+[15:35:06.272 P=26556]   mod[8] base=0x776C0000 size=0xBC000 RPCRT4.dll
+[15:35:06.273 P=26556]   mod[9] base=0x75740000 size=0x22000 GDI32.dll
+[15:35:06.274 P=26556]   mod[10] base=0x75520000 size=0x1B000 win32u.dll
+[15:35:06.275 P=26556]   mod[11] base=0x767D0000 size=0xEC000 gdi32full.dll
+[15:35:06.275 P=26556]   mod[12] base=0x77530000 size=0x85000 msvcp_win.dll
+[15:35:06.276 P=26556]   mod[13] base=0x778E0000 size=0x110000 ucrtbase.dll
+[15:35:06.279 P=26556]   mod[14] base=0x75310000 size=0x1D6000 USER32.dll
+[15:35:06.279 P=26556]   mod[15] base=0x754F0000 size=0x25000 IMM32.DLL
+[15:35:06.280 P=26556]   mod[16] base=0x74D30000 size=0x28000 revival_patcher.dll
+[15:35:06.280 P=26556]   mod[17] base=0x775C0000 size=0x69000 WS2_32.dll
+[15:35:06.281 P=26556]   mod[18] base=0x74CF0000 size=0x33000 winmm.dll
+[15:35:06.281 P=26556]   mod[19] base=0x755E0000 size=0x52000 SHLWAPI.dll
+[15:35:06.282 P=26556]   mod[20] base=0x75FC0000 size=0x6E6000 Windows.Storage.dll
+[15:35:06.282 P=26556]   mod[21] base=0x74F10000 size=0x293000 combase.dll
+[15:35:06.283 P=26556]   mod[22] base=0x741F0000 size=0x1E5000 d3dx9_42.dll
+[15:35:06.283 P=26556]   mod[23] base=0x74950000 size=0x76000 DSOUND.dll
+[15:35:06.284 P=26556]   mod[24] base=0x74CC0000 size=0x25000 winmmbase.dll
+[15:35:06.285 P=26556]   mod[25] base=0x74810000 size=0x55000 powrprof.dll
+[15:35:06.286 P=26556]   mod[26] base=0x748B0000 size=0x9A000 ResampleDmo.DLL
+[15:35:06.286 P=26556]   mod[27] base=0x75800000 size=0xD1000 shcore.dll
+[15:35:06.287 P=26556]   mod[28] base=0x76D90000 size=0x9F000 OLEAUT32.dll
+[15:35:06.287 P=26556]   mod[29] base=0x74C50000 size=0x9000 msdmo.dll
+[15:35:06.287 P=26556]   mod[30] base=0x74890000 size=0xE000 UMPDC.dll
+[15:35:06.288 P=26556]   mod[31] base=0x741B0000 size=0x38000 DINPUT8.dll
+[15:35:06.288 P=26556]   mod[32] base=0x74030000 size=0x172000 inputhost.dll
+[15:35:06.289 P=26556]   mod[33] base=0x73F50000 size=0xDD000 CoreMessaging.dll
+[15:35:06.289 P=26556]   mod[34] base=0x10000000 size=0x7D000 mss32.dll
+[15:35:06.289 P=26556]   mod[35] base=0x060C0000 size=0x3E000 mss32midi.dll
+[15:35:06.290 P=26556]   mod[36] base=0x77630000 size=0x77000 bcryptPrimitives.dll
+[15:35:06.290 P=26556]   mod[37] base=0x73F20000 size=0x25000 IPHLPAPI.DLL
+[15:35:06.291 P=26556]   mod[38] base=0x74870000 size=0xA000 CRYPTBASE.DLL
+[15:35:06.291 P=26556]   mod[39] base=0x75970000 size=0x643000 SHELL32.dll
+[15:35:06.292 P=26556]   mod[40] base=0x77780000 size=0x153000 ole32.dll
+[15:35:06.295 P=26556]   mod[41] base=0x74EA0000 size=0x61000 WLDAP32.dll
+[15:35:06.295 P=26556]   mod[42] base=0x06A30000 size=0x49000 BugTrap.dll
+[15:35:06.296 P=26556]   mod[43] base=0x76CD0000 size=0xB5000 COMDLG32.dll
+[15:35:06.296 P=26556]   mod[44] base=0x74C20000 size=0x8000 VERSION.dll
+[15:35:06.297 P=26556]   mod[45] base=0x73CF0000 size=0x224000 WININET.dll
+[15:35:06.297 P=26556]   mod[46] base=0x58DE0000 size=0xA1000 dbghelp.dll
+[15:35:06.298 P=26556]   mod[47] base=0x73B70000 size=0x17A000 d3d9.dll
+[15:35:06.298 P=26556]   mod[48] base=0x73B40000 size=0x26000 dwmapi.dll
+[15:35:06.299 P=26556]   mod[49] base=0x73B00000 size=0x38000 dxcore.dll
+[15:35:06.299 P=26556]   mod[50] base=0x01AD0000 size=0xF000 PhysXLoader.dll
+[15:35:06.300 P=26556]   mod[51] base=0x06B10000 size=0x42000 NMRunParamDLL.dll
+[15:35:06.300 P=26556]   mod[52] base=0x73A70000 size=0x8B000 WINSPOOL.DRV
+[15:35:06.301 P=26556]   mod[53] base=0x73A20000 size=0x3E000 cfgmgr32.dll
+[15:35:06.301 P=26556]   mod[54] base=0x749D0000 size=0x15000 kernel.appcore.dll
+[15:35:06.301 P=26556]   mod[55] base=0x74780000 size=0x80000 uxtheme.dll
+[15:35:06.301 P=26556] === 56 module(s) total ===
+[15:35:07.111 P=26556] HB iter=759 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65690875
+[15:35:07.186 P=26556] iter 760 total_set=26148 hits[val=0] iat=0
+[15:35:08.171 P=26556] HB iter=768 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65691937
+[15:35:09.200 P=26556] HB iter=777 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65692968
+[15:35:10.238 P=26556] HB iter=786 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65694000
+[15:35:11.273 P=26556] HB iter=795 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65695046
+[15:35:11.284 P=26556] --- thread EIP dump start ---
+[15:35:11.341 P=26556]   tid=20308 EIP=0x751DB030 (kernel32+0x2B030) ESP=0x001AFD44 [ESP]=0x008B988D (image+0x4B988D)
+[15:35:11.343 P=26556]   tid=15544 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0200FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:35:11.343 P=26556]   tid=16696 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0214FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:35:11.344 P=26556]   tid=16280 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0228FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:35:11.345 P=26556]   tid=23652 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x040FFBBC [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:35:11.345 P=26556]   tid=20264 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x042FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:35:11.346 P=26556]   tid=17432 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x043FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:35:11.347 P=26556]   tid=26956 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x044FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:35:11.348 P=26556]   tid=26536 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x045FFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:35:11.348 P=26556]   tid=23036 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0473FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:35:11.349 P=26556]   tid=11460 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0487FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:35:11.349 P=26556]   tid=20568 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x049BFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:35:11.350 P=26556]   tid=18268 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x04AFFED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:35:11.351 P=26556]   tid=2064 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04C3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:35:11.351 P=26556]   tid=21084 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04D7F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:35:11.353 P=26556]   tid=14916 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04EBF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:35:11.354 P=26556]   tid=21232 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x04FFF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:35:11.355 P=26556]   tid=23316 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0513F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:35:11.356 P=26556]   tid=20752 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0527F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:35:11.356 P=26556]   tid=11432 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x053BF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:35:11.357 P=26556]   tid=1484 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x054FF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:35:11.357 P=26556]   tid=8036 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x0563F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:35:11.358 P=26556]   tid=23676 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x057BF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:35:11.359 P=26556]   tid=25612 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x058FF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:35:11.359 P=26556]   tid=17756 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05A3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:35:11.360 P=26556]   tid=23596 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05B7F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:35:11.361 P=26556]   tid=19336 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05CBF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:35:11.361 P=26556]   tid=15184 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05DFF8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:35:11.362 P=26556]   tid=1396 EIP=0x77AB91FC (ntdll+0x791FC) ESP=0x05F3F8B8 [ESP]=0x76B58398 (kernelbase+0x158398)
+[15:35:11.363 P=26556]   tid=20372 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x0607FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:35:11.363 P=26556]   tid=21760 EIP=0x77AB978C (ntdll+0x7978C) ESP=0x06A2F964 [ESP]=0x76B5920F (kernelbase+0x15920F)
+[15:35:11.364 P=26556]   tid=2204 EIP=0x77AB951C (ntdll+0x7951C) ESP=0x0735FED4 [ESP]=0x77AD26D9 (ntdll+0x926D9)
+[15:35:11.365 P=26556]   tid=19980 EIP=0x77ABAECC (ntdll+0x7AECC) ESP=0x074AFED4 [ESP]=0x76BD0273 (kernelbase+0x1D0273)
+[15:35:11.365 P=26556]   tid=10344 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x078EFDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:35:11.366 P=26556]   tid=15628 EIP=0x77ABB03C (ntdll+0x7B03C) ESP=0x07A2FDB4 [ESP]=0x77A96607 (ntdll+0x56607)
+[15:35:11.369 P=26556] --- thread EIP dump end (35 threads) ---
+[15:35:11.369 P=26556] [NtQIP-cmp self] hProc=0xFFFFFFFF  hooked: status=0xC0000004 ExitStatus=0x0 | real: status=0xC0000004 ExitStatus=0x0
+[15:35:11.898 P=26556] iter 800 total_set=27548 hits[val=0] iat=0
+[15:35:12.293 P=26556] HB iter=803 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65696062
+[15:35:13.322 P=26556] HB iter=812 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65697093
+[15:35:14.378 P=26556] HB iter=821 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65698140
+[15:35:15.441 P=26556] HB iter=830 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65699203
+[15:35:16.516 P=26556] HB iter=839 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65700281
+[15:35:16.593 P=26556] iter 840 total_set=28948 hits[val=0] iat=0
+[15:35:17.087 P=26556] *** ntdll!RtlExitUserProcess(code=0xC000013A) caller=0x76C3587B (KERNELBASE.dll+0x23587B) -- BLOCKED (spinning) ***
+[15:35:17.592 P=26556] HB iter=848 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65701359
+[15:35:18.703 P=26556] HB iter=857 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65702468
+[15:35:19.789 P=26556] HB iter=866 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65703562
+[15:35:20.847 P=26556] HB iter=875 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65704609
+[15:35:21.383 P=26556] iter 880 total_set=30348 hits[val=0] iat=0
+[15:35:21.928 P=26556] HB iter=884 valHit=0 ggrHit=0 mbwHit=0 cpHit=0 tick=65705687
