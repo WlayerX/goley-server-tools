@@ -321,6 +321,10 @@ DWORD WINAPI PatchThread(LPVOID lpParam) {
             wsprintfA(buf, "HB iter=%d valHit=%d ggrHit=%d mbwHit=%d cpHit=%d tick=%lu",
                       iterations, g_valHit, g_ggrHit, g_mbwHit, g_cpHit, nowTick);
             Log(buf);
+            // Re-assert the last-chance UEF; Themida may hijack SetUnhandled-
+            // ExceptionFilter, which would hide the fatal exit from us.
+            if (ReassertLastChanceFilter())
+                Log("UEF was replaced -> re-installed ours (Themida hijack?)");
         }
 
         if ((nowTick - startTick) > 10000 &&
@@ -713,6 +717,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
                 // linked-list insertion, doesn't take loader lock.
                 g_vehHandle = AddVectoredExceptionHandler(1, VehHandler);
                 Log(g_vehHandle ? "[inline] VEH installed" : "[inline] VEH FAILED");
+                // Last-chance UEF -- captures the fatal exception that escapes
+                // the first-chance VEH (the invisible 0xC0000005 exit). Chains
+                // to Themida's previous top-level filter.
+                InstallLastChanceFilter();
             }
         } else {
             Log("[launcher] ScyllaHide / inline patches / VEH SKIPPED");

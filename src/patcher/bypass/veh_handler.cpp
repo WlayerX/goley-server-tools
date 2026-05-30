@@ -78,12 +78,28 @@ static void DumpCrashContext(PEXCEPTION_POINTERS exc, const char* tag) {
     char eipMod[64] = {0}; DWORD eipRva = 0;
     ResolveAddrToModule((void*)c->Eip, eipMod, sizeof(eipMod), &eipRva);
 
-    wsprintfA(buf, "================ CRASH [%s] code=0x%08X ================", tag, r->ExceptionCode);
+    wsprintfA(buf, "================ CRASH [%s] code=0x%08X tid=%lu ================",
+              tag, r->ExceptionCode, GetCurrentThreadId());
     LogCrash(buf);
     wsprintfA(buf, "  EIP=0x%08X (%s+0x%X / %s)  fault=0x%08X (%s)  flags=0x%X",
               c->Eip, eipMod, eipRva, ClassifyEip(c->Eip), faultAddr, accessTxt,
               r->ExceptionFlags);
     LogCrash(buf);
+
+    // 16 bytes at the faulting EIP -- characterizes the opcode stream we keep
+    // hitting (e.g. the Themida VM site). Guarded: the EIP page may be unmapped.
+    {
+        char hex[80]; int off = 0;
+        __try {
+            const BYTE* p = (const BYTE*)(ULONG_PTR)c->Eip;
+            for (int i = 0; i < 16; i++)
+                off += wsprintfA(hex + off, "%02X ", p[i]);
+            wsprintfA(buf, "  bytes@EIP=%s", hex);
+        } __except (EXCEPTION_EXECUTE_HANDLER) {
+            wsprintfA(buf, "  bytes@EIP=<unreadable>");
+        }
+        LogCrash(buf);
+    }
     wsprintfA(buf, "  EAX=0x%08X EBX=0x%08X ECX=0x%08X EDX=0x%08X",
               c->Eax, c->Ebx, c->Ecx, c->Edx);
     LogCrash(buf);
@@ -117,6 +133,45 @@ static void DumpCrashContext(PEXCEPTION_POINTERS exc, const char* tag) {
         }
     }
     LogCrash("================ END CRASH ================");
+}
+
+
+// ============================================================================
+// Last-chance UnhandledExceptionFilter -- the killer 0xC0000005 never reaches
+// our first-chance VEH (only the 2 rescued dumps ever appear, cap is 12). An
+// unhandled exception that walks past every SEH frame lands HERE right before
+// process death, so this is where we finally capture it. Chains to whatever
+// top-level filter was installed before us (Themida's, typically) so behavior
+// is preserved -- this is pure instrumentation.
+// ============================================================================
+static LPTOP_LEVEL_EXCEPTION_FILTER g_prevUef = NULL;
+
+LONG WINAPI LastChanceFilter(PEXCEPTION_POINTERS exc) {
+    DumpCrashContext(exc, "UNHANDLED-LASTCHANCE");
+    if (g_prevUef) return g_prevUef(exc);   // preserve Themida's UEF behavior
+    return EXCEPTION_EXECUTE_HANDLER;        // else let it die (logged)
+}
+
+void InstallLastChanceFilter(void) {
+    g_prevUef = SetUnhandledExceptionFilter(LastChanceFilter);
+    char mod[64] = {0}; DWORD rva = 0;
+    if (g_prevUef) ResolveAddrToModule((void*)g_prevUef, mod, sizeof(mod), &rva);
+    char buf[160];
+    wsprintfA(buf, "InstallLastChanceFilter: prev=0x%p (%s+0x%X)",
+              g_prevUef, g_prevUef ? mod : "<none>", rva);
+    Log(buf);
+}
+
+BOOL ReassertLastChanceFilter(void) {
+    // Re-install ours; the return value is whoever was the top-level filter just
+    // now. If it isn't ours, someone (Themida?) replaced it since last time.
+    LPTOP_LEVEL_EXCEPTION_FILTER nowPrev = SetUnhandledExceptionFilter(LastChanceFilter);
+    if (nowPrev != LastChanceFilter) {
+        // Keep chaining to the most-recent foreign filter so we don't drop it.
+        if (nowPrev) g_prevUef = nowPrev;
+        return TRUE;
+    }
+    return FALSE;
 }
 
 
@@ -463,7 +518,16 @@ LONG CALLBACK VehHandler(PEXCEPTION_POINTERS exc) {
         DWORD faultAddr = exc->ExceptionRecord->NumberParameters > 1
                           ? (DWORD)exc->ExceptionRecord->ExceptionInformation[1] : 0;
         if (code == EXCEPTION_ACCESS_VIOLATION && faultAddr == GOLEY_MBW_IAT_VA) {
-            return EXCEPTION_CONTINUE_SEARCH;  // silent
+            // De-silenced: if the KILLER AV is this one in disguise, we must see
+            // it. Capped so a real benign probe flood can't spam the log.
+            static volatile LONG g_iatProbeLog = 0;
+            if (InterlockedIncrement(&g_iatProbeLog) <= 10) {
+                char b[160];
+                wsprintfA(b, "[veh] IAT-probe AV swallowed silently @EIP=0x%X fault=0x%X",
+                          eip, faultAddr);
+                Log(b);
+            }
+            return EXCEPTION_CONTINUE_SEARCH;
         }
 
         // AV-rescue RE-ENABLED for the IFEO-wrapper setup. Previously
